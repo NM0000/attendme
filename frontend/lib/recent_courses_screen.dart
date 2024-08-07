@@ -7,7 +7,12 @@ class RecentCoursesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Recent Courses'),
+        title: const Text('Recent Courses', 
+          style:TextStyle(
+            fontSize: 25,
+            fontWeight: FontWeight.bold
+            ) 
+          ),
         backgroundColor: Colors.brown,
       ),
       body: Padding(
@@ -15,23 +20,41 @@ class RecentCoursesScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Recent Courses',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
+          
+            const SizedBox(height: 16), // Increased space between title and course list
+            Expanded(
+              child: ListView(
                 children: [
-                  _buildRecentCourseItem('Human Computer Interaction', 'assets/human_computer_interface.png'),
-                  _buildRecentCourseItem('Professionalism at Work Place', 'assets/professionalism_at_work_place.png'),
-                  _buildRecentCourseItem('Data Mining', 'assets/data_mining.png'),
-                  _buildRecentCourseItem('Capstone Project', 'assets/capstone_project.png'),
-                  _buildRecentCourseItem('IoT', 'assets/IoT.png'),
+                  _buildRecentCourseItem(
+                    context,
+                    'Human Computer Interaction',
+                    'assets/human_computer_interface.png',
+                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+                  ),
+                  _buildRecentCourseItem(
+                    context,
+                    'Professionalism at Work Place',
+                    'assets/professionalism_at_work_place.png',
+                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+                  ),
+                  _buildRecentCourseItem(
+                    context,
+                    'Data Mining',
+                    'assets/data_mining.png',
+                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+                  ),
+                  _buildRecentCourseItem(
+                    context,
+                    'Capstone Project',
+                    'assets/capstone_project.png',
+                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+                  ),
+                  _buildRecentCourseItem(
+                    context,
+                    'IoT',
+                    'assets/IoT.png',
+                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+                  ),
                 ],
               ),
             ),
@@ -41,23 +64,62 @@ class RecentCoursesScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRecentCourseItem(String title, String assetPath) {
-    return Container(
-      margin: const EdgeInsets.only(right: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Image.asset(assetPath, width: 150, height: 100),
-          const SizedBox(height: 4),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 14,
+  Widget _buildRecentCourseItem(BuildContext context, String title, String assetPath, String description) {
+    return GestureDetector(
+      onTap: () {
+        _showCourseInfo(context, title, description);
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(8.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 1,
+              blurRadius: 7,
+              offset: const Offset(0, 3),
             ),
-            textAlign: TextAlign.center,
-          ),
-        ],
+          ],
+        ),
+        child: Row(
+          children: [
+            Image.asset(assetPath, width: 100, height: 75, fit: BoxFit.cover),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
+    );
+  }
+
+  void _showCourseInfo(BuildContext context, String title, String description) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(description),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

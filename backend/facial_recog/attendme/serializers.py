@@ -1,11 +1,3 @@
-# from rest_framework import serializers
-# from .models import Student
-
-# class StudentSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Student
-#         fields = '__all__'
-
 from rest_framework import serializers
 from .models import Teacher
 from .models import Student, StudentImage
@@ -14,6 +6,11 @@ class TeacherSerializer(serializers.ModelSerializer):
     class Meta:
         model = Teacher
         fields = ['teacher_id', 'password']
+        extra_kwargs = {'password': {'write_only': True}}
+    
+    def create(self, validated_data):
+        teacher = Teacher.objects.create_user(**validated_data)
+        return teacher
 
 
 class StudentSerializer(serializers.ModelSerializer):

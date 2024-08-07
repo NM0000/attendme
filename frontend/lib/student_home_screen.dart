@@ -53,12 +53,6 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                 Navigator.pushNamed(context, '/notification_screen');
               },
             ),
-            IconButton(
-              icon: const Icon(Icons.menu),
-              onPressed: () {
-                _showMenu(context);
-              },
-            ),
           ],
         ),
       ),
@@ -153,29 +147,6 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Recent Courses Section
-              const Text(
-                'Recent Courses',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    _buildRecentCourseItem('Human Computer Interaction', 'assets/human_computer_interface.png'),
-                    _buildRecentCourseItem('Professionalism at Work Place', 'assets/professionalism_at_work_place.png'),
-                    _buildRecentCourseItem('Data Mining', 'assets/data_mining.png'),
-                    _buildRecentCourseItem('Capstone Project', 'assets/capstone_project.png'),
-                    _buildRecentCourseItem('IoT', 'assets/IoT.png'),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-
               // Attendance History Section
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -245,26 +216,6 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
           Image.asset(assetPath, width: 40, height: 40),
           const SizedBox(height: 4),
           Text(title),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRecentCourseItem(String title, String assetPath) {
-    return Container(
-      margin: const EdgeInsets.only(right: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Image.asset(assetPath, width: 150, height: 100),
-          const SizedBox(height: 4),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 14,
-            ),
-            textAlign: TextAlign.center,
-          ),
         ],
       ),
     );

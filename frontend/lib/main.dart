@@ -7,7 +7,9 @@ import 'student_login.dart';
 import 'teacher_login.dart';
 import 'student_register_screen.dart';
 import 'teacher_register_screen.dart';
-import 'attendance_provider.dart'; // Import the provider
+import 'attendance_provider.dart';
+import 'settings_screen.dart';
+import 'recent_courses_screen.dart'; // Import RecentCoursesScreen
 
 void main() {
   _setupLogging();
@@ -46,6 +48,8 @@ class MyApp extends StatelessWidget {
           '/teacher_login': (context) => const TeacherLoginScreen(),
           '/student_register': (context) => const StudentRegisterScreen(),
           '/teacher_register': (context) => const TeacherRegisterScreen(),
+          '/settings_screen': (context) => const SettingsScreen(),
+          '/recent_courses_screen': (context) => const RecentCoursesScreen(),
         },
       ),
     );
