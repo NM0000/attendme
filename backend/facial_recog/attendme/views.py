@@ -1,31 +1,19 @@
-# from rest_framework import viewsets
-# from .models import Student
-# from .serializers import StudentSerializer
-
-# class StudentViewSet(viewsets.ModelViewSet):
-#     queryset = Student.objects.all()
-#     serializer_class = StudentSerializer
-
-
 from rest_framework import viewsets, status
 from rest_framework.permissions import AllowAny
 from .models import Student, StudentImage
 from .models import Teacher
+from rest_framework import generics
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 from .serializers import TeacherSerializer
 from .serializers import StudentSerializer, StudentImageSerializer
+
+
 
 class TeacherViewSet(viewsets.ModelViewSet):
     queryset = Teacher.objects.all()
     serializer_class = TeacherSerializer
-    permission_classes = [AllowAny]
-
-    def create(self, request, *args, **kwargs):
-        teacher_id = request.data.get('teacher_id')
-        password = request.data.get('password')
-        teacher = Teacher(teacher_id=teacher_id, password=password)
-        teacher.save()
-        return Response({'access': 'fake-access-token', 'refresh': 'fake-refresh-token'}, status=201)
-
+    permission_classes = [AllowAny]  # Allow any user to access this endpoint
 
 
 class StudentViewSet(viewsets.ModelViewSet):

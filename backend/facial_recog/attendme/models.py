@@ -1,10 +1,22 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
-class Teacher(AbstractBaseUser):
-    teacher_id = models.CharField(max_length=100, unique=True)
-    password = models.CharField(max_length=100)
+class TeacherManager(BaseUserManager):
+    def create_user(self, teacher_id, password=None):
+        if not teacher_id:
+            raise ValueError("Teachers must have an ID")
+        teacher = self.model(teacher_id=teacher_id)
+        teacher.set_password(password)
+        teacher.save(using=self._db)
+        return teacher
 
+class Teacher(AbstractBaseUser):
+    teacher_id = models.CharField(max_length=255, unique=True)
+    is_active = models.BooleanField(default=True)
+    is_admin = models.BooleanField(default=False)
+    
+    objects = TeacherManager()
+    
     USERNAME_FIELD = 'teacher_id'
 
 

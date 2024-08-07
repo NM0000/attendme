@@ -6,6 +6,11 @@ class TeacherSerializer(serializers.ModelSerializer):
     class Meta:
         model = Teacher
         fields = ['teacher_id', 'password']
+        extra_kwargs = {'password': {'write_only': True}}
+    
+    def create(self, validated_data):
+        teacher = Teacher.objects.create_user(**validated_data)
+        return teacher
 
 
 class StudentSerializer(serializers.ModelSerializer):
