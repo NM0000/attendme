@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:logging/logging.dart';
 import 'landing_screen.dart';
 import 'choose_option_screen.dart';
@@ -6,6 +7,7 @@ import 'student_login.dart';
 import 'teacher_login.dart';
 import 'student_register_screen.dart';
 import 'teacher_register_screen.dart';
+import 'attendance_provider.dart'; // Import the provider
 
 void main() {
   _setupLogging();
@@ -25,21 +27,27 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'AttendMe',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AttendanceProvider()), // Add your provider here
+        // Add other providers if needed
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'AttendMe',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        initialRoute: '/',
+        routes: {
+          '/': (context) => const LandingScreen(),
+          '/choose_option': (context) => const ChooseOptionScreen(),
+          '/student_login': (context) => const StudentLoginScreen(),
+          '/teacher_login': (context) => const TeacherLoginScreen(),
+          '/student_register': (context) => const StudentRegisterScreen(),
+          '/teacher_register': (context) => const TeacherRegisterScreen(),
+        },
       ),
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const LandingScreen(),
-        '/choose_option': (context) => const ChooseOptionScreen(),
-        '/student_login': (context) => const StudentLoginScreen(),
-        '/teacher_login': (context) => const TeacherLoginScreen(),
-        '/student_register': (context) => const StudentRegisterScreen(),
-        '/teacher_register': (context) => const TeacherRegisterScreen(),
-      },
     );
   }
 }

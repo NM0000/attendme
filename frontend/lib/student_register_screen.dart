@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-// import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'choose_option_screen.dart';
+import 'face_capture_screen.dart';
 
 class StudentRegisterScreen extends StatefulWidget {
   const StudentRegisterScreen({super.key});
@@ -22,38 +22,26 @@ class _StudentRegisterScreenState extends State<StudentRegisterScreen> {
   final TextEditingController _studentIdController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final int _maxImages = 10;
   List<File> _images = [];
-  bool _isCapturing = false;
 
-  // Angles to capture: front, left, right, up, down
-  final List<String> _requiredAngles = ['Front', 'Left', 'Right', 'Up', 'Down'];
-  List<String> _capturedAngles = [];
+  Future<void> _navigateToCaptureScreen() async {
+    final capturedImages = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const FaceCaptureScreen()),
+    );
 
-  Future<void> _pickImage(String angle) async {
-    // Bypass the actual image picking and add a placeholder image
-    setState(() {
-      _images.add(File('assets/placeholder.png'));  // Add a placeholder image path
-      _capturedAngles.add(angle);
-    });
-
-    // Check if all required angles are captured
-    if (_capturedAngles.toSet().containsAll(_requiredAngles.toSet()) ||
-        _images.length >= _maxImages) {
+    if (capturedImages != null && capturedImages is List<File>) {
       setState(() {
-        _isCapturing = false;
+        _images = capturedImages;
       });
-    } else {
-      _showCaptureFaceDialog();
     }
   }
 
   Future<void> _register() async {
-    if (_formKey.currentState!.validate() &&
-        _capturedAngles.toSet().containsAll(_requiredAngles.toSet())) {
+    if (_formKey.currentState!.validate() && _images.isNotEmpty) {
       final request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://your-django-backend-url/api/accounts/register/'),
+        Uri.parse('http://127.0.0.1:8000//api/accounts/register/'),
       );
 
       request.fields['studentId'] = _studentIdController.text;
@@ -120,8 +108,7 @@ class _StudentRegisterScreenState extends State<StudentRegisterScreen> {
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Error'),
-          content:
-              const Text('Please capture images from all required angles.'),
+          content: const Text('Please capture images from all required angles.'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -131,44 +118,6 @@ class _StudentRegisterScreenState extends State<StudentRegisterScreen> {
         ),
       );
     }
-  }
-
-  void _showCaptureFaceDialog() {
-    final remainingAngles = _requiredAngles
-        .where((angle) => !_capturedAngles.contains(angle))
-        .toList();
-    final nextAngle =
-        remainingAngles.isNotEmpty ? remainingAngles.first : 'any angle';
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Capture Face'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Please capture a photo from the $nextAngle.'),
-            const SizedBox(height: 20),
-            GestureDetector(
-              onTap: () {
-                Navigator.pop(context); // Close the dialog
-                _pickImage(nextAngle); // Capture image
-              },
-              child: Image.asset('assets/camera_button.png',
-                  width: 40, height: 40),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context); // Close the dialog
-            },
-            child: const Text('Cancel'),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -304,14 +253,8 @@ class _StudentRegisterScreenState extends State<StudentRegisterScreen> {
                       ),
                       const SizedBox(height: 32),
                       ElevatedButton(
-                        onPressed: _capturedAngles
-                                    .toSet()                                    .containsAll(_requiredAngles.toSet()) ||
-                                _images.length >= _maxImages
-                            ? null
-                            : () => _showCaptureFaceDialog(),
-                        child: Text(_isCapturing
-                            ? 'Capturing…'
-                            : 'Capture Facial Data'),
+                        onPressed: _navigateToCaptureScreen,
+                        child: const Text('Capture Facial Data'),
                       ),
                       const SizedBox(height: 16),
                       _images.isEmpty
@@ -341,5 +284,3 @@ class _StudentRegisterScreenState extends State<StudentRegisterScreen> {
     );
   }
 }
-
-                                   

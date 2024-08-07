@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+import 'attendance_provider.dart';
 
 class StudentHomeScreen extends StatefulWidget {
   const StudentHomeScreen({super.key});
@@ -30,6 +32,9 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
   Widget build(BuildContext context) {
     String currentDate = DateFormat.yMMMMd().format(DateTime.now());
 
+    // Get the AttendanceProvider from the context
+    final attendanceProvider = Provider.of<AttendanceProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -46,6 +51,12 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
               icon: const Icon(Icons.notifications),
               onPressed: () {
                 Navigator.pushNamed(context, '/notification_screen');
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.menu),
+              onPressed: () {
+                _showMenu(context);
               },
             ),
           ],
@@ -185,9 +196,9 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                 ],
               ),
               const SizedBox(height: 8),
-              _buildAttendanceHistoryItem('24 Mon', 'Subject: Human Computer Interaction', 'Time: 10:30 AM'),
-              _buildAttendanceHistoryItem('24 Mon', 'Subject: Professionalism', 'Time: 9:30 AM'),
-              _buildAttendanceHistoryItem('23 Sun', 'You Have Been Marked As Absent', 'Subject: Human Computer Interaction'),
+              ...attendanceProvider.attendanceData.entries.map((entry) {
+                return _buildAttendanceHistoryItem(entry.key, entry.value ? 'Present' : 'Absent', 'Subject: Example');
+              }).toList(),
             ],
           ),
         ),
@@ -203,8 +214,8 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
             label: 'Profile',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
+            icon: Icon(Icons.menu),
+            label: 'Menu',
           ),
         ],
         onTap: (index) {
@@ -216,7 +227,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
               Navigator.pushNamed(context, '/profile_screen');
               break;
             case 2:
-              Navigator.pushNamed(context, '/settings_screen');
+              _showMenu(context);
               break;
           }
         },
@@ -291,6 +302,33 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
           Text(subtitle),
         ],
       ),
+    );
+  }
+
+  void _showMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Icon(Icons.book),
+              title: Text('Recent Courses'),
+              onTap: () {
+                Navigator.pushNamed(context, '/recent_courses_screen');
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.settings),
+              title: Text('Settings'),
+              onTap: () {
+                Navigator.pushNamed(context, '/settings_screen');
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

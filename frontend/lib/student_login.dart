@@ -15,7 +15,6 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
 
   void _login() {
     if (_formKey.currentState!.validate()) {
-      // Implement real login logic here
       String email = _emailController.text;
       String password = _passwordController.text;
 
@@ -31,7 +30,6 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
   }
 
   bool _validateCredentials(String email, String password) {
-    // Replace this with real authentication logic
     return email == 'student' && password == '123';
   }
 
@@ -77,7 +75,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Image.asset('assets/logo.png', width: 150, height: 150), // Enlarge logo
+                  Image.asset('assets/logo.png', width: 150, height: 150),
                   const SizedBox(height: 20),
                   const Text(
                     'Welcome to Attend Me',
