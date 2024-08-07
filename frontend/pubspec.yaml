@@ -12,10 +12,9 @@ dependencies:
   image_picker: ^0.8.5+3
   camera: ^0.10.0+2
   logging: ^1.0.2
+  http: ^0.13.4
   shared_preferences: ^2.0.15
   intl: ^0.18.0
-  http: ^0.13.3
-
 
 dev_dependencies:
   flutter_test:
@@ -43,4 +42,3 @@ flutter:
     - assets/leave_notes.png
     - assets/attendance_report.png
     - assets/profile.png
-

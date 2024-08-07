@@ -43,7 +43,7 @@ class ChooseOptionScreen extends StatelessWidget {
                       const SizedBox(height: 38),
                       OptionButton(
                         text: 'Student',
-                        color: Colors.teal[200]!,
+                        color: Colors.teal[300]!, // Adjusted color
                         imagePath: 'assets/login.png',
                         onTap: () {
                           Navigator.push(
@@ -55,7 +55,7 @@ class ChooseOptionScreen extends StatelessWidget {
                       const SizedBox(height: 32),
                       OptionButton(
                         text: 'Teacher',
-                        color: Colors.orange[200]!,
+                        color: Colors.orange[300]!, // Adjusted color
                         imagePath: 'assets/login.png',
                         onTap: () {
                           Navigator.push(
@@ -64,43 +64,61 @@ class ChooseOptionScreen extends StatelessWidget {
                           );
                         },
                       ),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 50),
                       GestureDetector(
                         onTap: () {
                           showModalBottomSheet(
                             context: context,
                             builder: (BuildContext context) {
                               return Container(
-                                padding: const EdgeInsets.all(16.0),
+                                padding: const EdgeInsets.all(20.0),
+                                decoration: const BoxDecoration(
+                                  color: Colors.grey,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(20.0),
+                                    topRight: Radius.circular(20.0),
+                                  ),
+                                ),
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    OptionButton(
-                                      text: 'Register as Student',
-                                      color: Colors.teal[200]!,
-                                      imagePath: 'assets/register.png',
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  const StudentRegisterScreen()),
-                                        );
-                                      },
-                                    ),
                                     const SizedBox(height: 16),
-                                    OptionButton(
-                                      text: 'Register as Teacher',
-                                      color: Colors.orange[200]!,
-                                      imagePath: 'assets/register.png',
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  const TeacherRegisterScreen()),
-                                        );
-                                      },
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        OptionButton(
+                                          text: 'Register\nAs\nStudent',
+                                          color: Colors.teal[300]!, // Adjusted color
+                                          imagePath: 'assets/register.png',
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      const StudentRegisterScreen()),
+                                            );
+                                          },
+                                          textAlign: TextAlign.center,
+                                          heightIncrease: 0.05,
+                                          imageSize: 100,
+                                        ),
+                                        OptionButton(
+                                          text: 'Register\nAs\nTeacher',
+                                          color: Colors.orange[300]!, // Adjusted color
+                                          imagePath: 'assets/register.png',
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      const TeacherRegisterScreen()),
+                                            );
+                                          },
+                                          textAlign: TextAlign.center,
+                                          heightIncrease: 0.05,
+                                          imageSize: 100,
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -145,12 +163,18 @@ class OptionButton extends StatelessWidget {
   final Color color;
   final String imagePath;
   final VoidCallback onTap;
+  final TextAlign textAlign;
+  final double heightIncrease;
+  final double imageSize;
 
   const OptionButton({
     required this.text,
     required this.color,
     required this.imagePath,
     required this.onTap,
+    this.textAlign = TextAlign.left,
+    this.heightIncrease = 0,
+    this.imageSize = 80,
     super.key,
   });
 
@@ -159,25 +183,28 @@ class OptionButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 200,
+        width: 180,
+        height: 200 * (1 + heightIncrease), // Increased height by 5%
         padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(16.0),
         ),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               text,
+              textAlign: textAlign,
               style: const TextStyle(
-                fontSize: 24,
+                fontSize: 28,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 20),
             Image.asset(
               imagePath,
-              width: 100,
+              width: imageSize, // Increased image size
             ),
           ],
         ),
