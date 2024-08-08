@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'teacher_home_screen.dart';
+import 'forgot_password_screen.dart'; 
 
 class TeacherLoginScreen extends StatefulWidget {
   const TeacherLoginScreen({super.key});
@@ -15,7 +16,6 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
 
   void _login() {
     if (_formKey.currentState!.validate()) {
-      // Implement real login logic here
       String email = _emailController.text;
       String password = _passwordController.text;
 
@@ -31,7 +31,6 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
   }
 
   bool _validateCredentials(String email, String password) {
-    // Replace this with real authentication logic
     return email == 'teacher' && password == '123';
   }
 
@@ -77,7 +76,7 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Image.asset('assets/logo.png', width: 150, height: 150), // Enlarge logo
+                  Image.asset('assets/logo.png', width: 150, height: 150),
                   const SizedBox(height: 20),
                   const Text(
                     'Welcome to Attend Me',
@@ -131,7 +130,12 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
                         const SizedBox(height: 20),
                         TextButton(
                           onPressed: () {
-                            // Handle forgot password
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ForgotPasswordScreen(isTeacher: true),
+                              ),
+                            );
                           },
                           child: const Text('Forgot Password?'),
                         ),

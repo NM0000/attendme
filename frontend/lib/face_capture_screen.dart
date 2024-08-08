@@ -1,7 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
-import 'package:path_provider/path_provider.dart';  // Correct import
+import 'package:path_provider/path_provider.dart'; 
 
 class FaceCaptureScreen extends StatefulWidget {
   const FaceCaptureScreen({Key? key}) : super(key: key);

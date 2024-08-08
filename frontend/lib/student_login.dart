@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'student_home_screen.dart';
+import 'forgot_password_screen.dart'; // Import the ForgotPasswordScreen
 
 class StudentLoginScreen extends StatefulWidget {
   const StudentLoginScreen({super.key});
@@ -129,7 +130,12 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                         const SizedBox(height: 20),
                         TextButton(
                           onPressed: () {
-                            // Handle forgot password
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ForgotPasswordScreen(isTeacher: false),
+                              ),
+                            );
                           },
                           child: const Text('Forgot Password?'),
                         ),

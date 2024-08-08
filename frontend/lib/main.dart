@@ -9,7 +9,7 @@ import 'student_register_screen.dart';
 import 'teacher_register_screen.dart';
 import 'attendance_provider.dart';
 import 'settings_screen.dart';
-import 'recent_courses_screen.dart'; // Import RecentCoursesScreen
+import 'recent_courses_screen.dart'; 
 
 void main() {
   _setupLogging();

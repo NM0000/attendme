@@ -75,11 +75,48 @@ class SettingsScreen extends StatelessWidget {
             ),
             TextButton(
               child: const Text('Change Password'),
+              onPressed: () async {
+                String currentPassword = currentPasswordController.text.trim();
+                String newPassword = newPasswordController.text.trim();
+                String confirmPassword = confirmPasswordController.text.trim();
+
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                String? storedPassword = prefs.getString('password');
+
+                if (storedPassword == null) {
+                  _showFeedbackDialog(context, 'Error', 'No password has been set.');
+                } else if (storedPassword != currentPassword) {
+                  _showFeedbackDialog(context, 'Error', 'Current password is incorrect.');
+                } else if (newPassword != confirmPassword) {
+                  _showFeedbackDialog(context, 'Error', 'New password and confirm password do not match.');
+                } else if (newPassword == currentPassword) {
+                  _showFeedbackDialog(context, 'Error', 'New password cannot be the same as the current password.');
+                } else {
+                  await prefs.setString('password', newPassword);
+                  Navigator.of(context).pop(); // Close the change password dialog
+                  _showFeedbackDialog(context, 'Success', 'Password has been changed successfully.');
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showFeedbackDialog(BuildContext context, String title, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
               onPressed: () {
-                // Implement password change logic here
-                // Ensure to validate the new password and confirm password fields
                 Navigator.of(context).pop();
               },
+              child: const Text('OK'),
             ),
           ],
         );
@@ -91,12 +128,13 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings',  
-          style:TextStyle(
+        title: const Text(
+          'Settings',
+          style: TextStyle(
             fontSize: 25,
-            fontWeight: FontWeight.bold
-            ) 
+            fontWeight: FontWeight.bold,
           ),
+        ),
         backgroundColor: Colors.brown,
       ),
       body: Center(
