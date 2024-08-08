@@ -12,8 +12,8 @@ class LandingScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Image.asset('assets/logo.png', width: 300, height: 300),
-            const SizedBox(height: 20),
+            Image.asset('assets/logo.png', width: 250, height: 250),
+            const SizedBox(height: 30),
             const Text(
               'AttendMe',
               style: TextStyle(

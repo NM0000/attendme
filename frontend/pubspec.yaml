@@ -22,6 +22,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.10.0
 
 flutter:
   uses-material-design: true
@@ -44,3 +45,8 @@ flutter:
     - assets/leave_notes.png
     - assets/attendance_report.png
     - assets/profile.png
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: assets/icon.png
