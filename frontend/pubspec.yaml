@@ -17,6 +17,9 @@ dependencies:
   shared_preferences: ^2.0.15
   intl: ^0.18.0
   path_provider: ^2.0.11 
+  table_calendar: ^3.0.0
+  
+
 
 dev_dependencies:
   flutter_test:
@@ -45,8 +48,13 @@ flutter:
     - assets/leave_notes.png
     - assets/attendance_report.png
     - assets/profile.png
+    - assets/takeattendance.png
+    - assets/report.png
+    - assets/studentlist.png
 
 flutter_icons:
   android: true
   ios: true
-  image_path: assets/icon.png
+  image_path: "assets/icon.png"
+  adaptive_icon_background: "#ffffff"  
+  adaptive_icon_foreground: "assets/icon.png"

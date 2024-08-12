@@ -10,6 +10,7 @@ import 'teacher_register_screen.dart';
 import 'attendance_provider.dart';
 import 'settings_screen.dart';
 import 'recent_courses_screen.dart'; 
+import 'reminder_screen.dart'; // Import your reminder screen
 
 void main() {
   _setupLogging();
@@ -50,6 +51,7 @@ class MyApp extends StatelessWidget {
           '/teacher_register': (context) => const TeacherRegisterScreen(),
           '/settings_screen': (context) => const SettingsScreen(),
           '/recent_courses_screen': (context) => const RecentCoursesScreen(),
+          '/reminder_screen': (context) => const AddReminderScreen(), // Add this route
         },
       ),
     );
