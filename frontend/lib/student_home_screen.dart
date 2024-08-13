@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
+import 'package:table_calendar/table_calendar.dart';
 import 'attendance_provider.dart';
 
 class StudentHomeScreen extends StatefulWidget {
@@ -13,11 +14,15 @@ class StudentHomeScreen extends StatefulWidget {
 
 class _StudentHomeScreenState extends State<StudentHomeScreen> {
   String userName = 'User'; // Default user name
+  DateTime _selectedDay = DateTime.now();
+  Map<String, List<String>> _reminders = {}; // To store reminders
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _loadUserName();
+    _loadReminders();
   }
 
   // Load the user's name from shared preferences
@@ -26,6 +31,38 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
     setState(() {
       userName = prefs.getString('userName') ?? 'User';
     });
+  }
+
+  // Load reminders from shared preferences
+  Future<void> _loadReminders() async {
+    final prefs = await SharedPreferences.getInstance();
+    final reminderList = prefs.getStringList('reminders') ?? [];
+
+    Map<String, List<String>> loadedReminders = {};
+
+    for (String reminder in reminderList) {
+      final parts = reminder.split(': ');
+      final date = parts[0];
+      final reminderText = parts[1];
+
+      if (loadedReminders[date] == null) {
+        loadedReminders[date] = [];
+      }
+      loadedReminders[date]!.add(reminderText);
+    }
+
+    setState(() {
+      _reminders = loadedReminders;
+    });
+  }
+
+  // Scroll to top method
+  void _scrollToTop() {
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
   }
 
   @override
@@ -57,6 +94,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
         ),
       ),
       body: SingleChildScrollView(
+        controller: _scrollController,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -83,7 +121,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Reminder Section
+              // Calendar Section
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -98,31 +136,31 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                   ],
                 ),
                 padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Reminder',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            // Show all reminders
-                          },
-                          child: const Text('View All'),
-                        ),
-                      ],
+                child: TableCalendar(
+                  focusedDay: _selectedDay,
+                  firstDay: DateTime.utc(2020, 1, 1),
+                  lastDay: DateTime.utc(2120, 12, 31),
+                  selectedDayPredicate: (day) => isSameDay(day, _selectedDay),
+                  onDaySelected: (selectedDay, focusedDay) {
+                    setState(() {
+                      _selectedDay = selectedDay;
+                    });
+                    _showRemindersDialog(selectedDay);
+                  },
+                  eventLoader: (day) {
+                    final dateStr = DateFormat.yMd().format(day);
+                    return _reminders[dateStr] ?? [];
+                  },
+                  calendarStyle: const CalendarStyle(
+                    todayDecoration: BoxDecoration(
+                      color: Colors.blueAccent,
+                      shape: BoxShape.circle,
                     ),
-                    const Text('Subject: Computer Design'),
-                    const Text('Class: F104'),
-                    const Text('Time: 1:00 - 3:00'),
-                  ],
+                    selectedDecoration: BoxDecoration(
+                      color: Colors.orange,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -139,7 +177,6 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildQuickAccessItem(context, 'Calendar', 'assets/calender.png', '/calendar_screen'),
                   _buildQuickAccessItem(context, 'Events', 'assets/event.png', '/events_screen'),
                   _buildQuickAccessItem(context, 'Leave Note', 'assets/leave_notes.png', '/leave_note_screen'),
                   _buildQuickAccessItem(context, 'Attendance Record', 'assets/attendance_report.png', '/attendance_record_screen'),
@@ -192,7 +229,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
         onTap: (index) {
           switch (index) {
             case 0:
-              Navigator.pushNamed(context, '/home_screen');
+              _scrollToTop();
               break;
             case 1:
               Navigator.pushNamed(context, '/profile_screen');
@@ -211,12 +248,22 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
       onTap: () {
         Navigator.pushNamed(context, routeName);
       },
-      child: Column(
-        children: [
-          Image.asset(assetPath, width: 40, height: 40),
-          const SizedBox(height: 4),
-          Text(title),
-        ],
+      child: Container(
+        width: 100, // Adjust width to fit items in a single line with padding
+        child: Column(
+          children: [
+            Image.asset(assetPath, width: 40, height: 40),
+            const SizedBox(height: 4),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 14,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -256,6 +303,36 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
     );
   }
 
+  void _showRemindersDialog(DateTime selectedDay) {
+    final dateStr = DateFormat.yMd().format(selectedDay);
+    final remindersForDay = _reminders[dateStr] ?? [];
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(DateFormat.yMMMMd().format(selectedDay)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: remindersForDay.isEmpty
+                ? [const Text('No reminders for this day.')]
+                : remindersForDay
+                    .map((reminder) => ListTile(
+                          title: Text(reminder),
+                        ))
+                    .toList(),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _showMenu(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -264,15 +341,15 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: Icon(Icons.book),
-              title: Text('Recent Courses'),
+              leading: const Icon(Icons.book),
+              title: const Text('Recent Courses'),
               onTap: () {
                 Navigator.pushNamed(context, '/recent_courses_screen');
               },
             ),
             ListTile(
-              leading: Icon(Icons.settings),
-              title: Text('Settings'),
+              leading: const Icon(Icons.settings),
+              title: const Text('Settings'),
               onTap: () {
                 Navigator.pushNamed(context, '/settings_screen');
               },

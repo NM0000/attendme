@@ -6,6 +6,7 @@ import 'reminder_screen.dart';
 import 'take_attendance_page.dart';
 import 'student_list_page.dart';
 import 'reports_page.dart';
+import 'settings_screen.dart'; // Import the SettingsScreen
 
 class TeacherHomeScreen extends StatefulWidget {
   const TeacherHomeScreen({super.key});
@@ -17,7 +18,7 @@ class TeacherHomeScreen extends StatefulWidget {
 class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
   String teacherName = 'Teacher';
   DateTime _selectedDay = DateTime.now();
-  Map<DateTime, List<String>> _reminders = {};
+  Map<String, List<String>> _reminders = {};
 
   @override
   void initState() {
@@ -39,11 +40,11 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
 
     print('Loaded reminders: $reminderList'); // Debug: Check loaded reminders
 
-    Map<DateTime, List<String>> loadedReminders = {};
+    Map<String, List<String>> loadedReminders = {};
 
     for (String reminder in reminderList) {
       final parts = reminder.split(': ');
-      final date = DateFormat.yMd().parse(parts[0]);
+      final date = parts[0];
       final reminderText = parts[1];
 
       if (loadedReminders[date] == null) {
@@ -83,6 +84,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
         ),
       ),
       body: SingleChildScrollView(
+        controller: _scrollController, // Add a ScrollController
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -146,7 +148,12 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
         onTap: (index) {
           switch (index) {
             case 0:
-              // Handle Home button tap
+              // Scroll to top when Home is tapped
+              _scrollController.animateTo(
+                0,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOut,
+              );
               break;
             case 1:
               _showMenu(context);
@@ -168,7 +175,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
         child: Container(
-          height: 110,
+          height: 130,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
@@ -197,11 +204,12 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Image.asset(
-                  assetPath,
-                  width: 90,
-                  height: 90,
-                  fit: BoxFit.cover,
+                child: AspectRatio(
+                  aspectRatio: 1, // Maintain aspect ratio
+                  child: Image.asset(
+                    assetPath,
+                    fit: BoxFit.contain, // Prevent distortion
+                  ),
                 ),
               ),
             ],
@@ -239,7 +247,8 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
             _showRemindersDialog(selectedDay);
           },
           eventLoader: (day) {
-            return _reminders[day] ?? [];
+            final dateStr = DateFormat.yMd().format(day);
+            return _reminders[dateStr] ?? [];
           },
           calendarStyle: const CalendarStyle(
             todayDecoration: BoxDecoration(
@@ -257,25 +266,60 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
   }
 
   void _showRemindersDialog(DateTime selectedDay) {
-    final remindersForDay = _reminders[selectedDay] ?? [];
+    final dateStr = DateFormat.yMd().format(selectedDay);
+    final remindersForDay = _reminders[dateStr] ?? [];
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(DateFormat.yMMMMd().format(selectedDay)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: remindersForDay.isEmpty
-                ? [const Text('No reminders for this day.')]
-                : remindersForDay.map((reminder) => Text(reminder)).toList(),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Close'),
-            ),
-          ],
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: Text(DateFormat.yMMMMd().format(selectedDay)),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: remindersForDay.isEmpty
+                    ? [const Text('No reminders for this day.')]
+                    : remindersForDay
+                        .asMap()
+                        .entries
+                        .map((entry) {
+                          final index = entry.key;
+                          final reminder = entry.value;
+                          return ListTile(
+                            title: Text(reminder),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () async {
+                                // Remove the reminder
+                                final prefs = await SharedPreferences.getInstance();
+                                final savedReminders = prefs.getStringList('reminders') ?? [];
+                                final reminderToRemove = '$dateStr: $reminder';
+                                
+                                savedReminders.remove(reminderToRemove);
+                                await prefs.setStringList('reminders', savedReminders);
+
+                                // Reload reminders
+                                await _loadReminders();
+                                
+                                // Update the UI
+                                setState(() {
+                                  remindersForDay.removeAt(index);
+                                });
+                              },
+                            ),
+                          );
+                        })
+                        .toList(),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Close'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -294,15 +338,24 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const AddReminderScreen()),
-                ).then((_) => _loadReminders());  // Reload reminders after adding a new one
+                  MaterialPageRoute(
+                    builder: (context) => AddReminderScreen(
+                      onReminderAdded: () {
+                        _loadReminders(); // Reload reminders after adding a new one
+                      },
+                    ),
+                  ),
+                );
               },
             ),
             ListTile(
               leading: const Icon(Icons.settings),
               title: const Text('Settings'),
               onTap: () {
-                // Navigate to settings
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SettingsScreen()), // Navigate to SettingsScreen
+                );
               },
             ),
           ],
@@ -310,4 +363,6 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       },
     );
   }
+
+  final ScrollController _scrollController = ScrollController(); 
 }
