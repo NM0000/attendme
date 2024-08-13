@@ -56,15 +56,6 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
     });
   }
 
-  // Scroll to top method
-  void _scrollToTop() {
-    _scrollController.animateTo(
-      0,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOut,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     String currentDate = DateFormat.yMMMMd().format(DateTime.now());
@@ -179,7 +170,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                 children: [
                   _buildQuickAccessItem(context, 'Events', 'assets/event.png', '/events_screen'),
                   _buildQuickAccessItem(context, 'Leave Note', 'assets/leave_notes.png', '/leave_note_screen'),
-                  _buildQuickAccessItem(context, 'Attendance Record', 'assets/attendance_report.png', '/attendance_record_screen'),
+                  _buildQuickAccessItem(context, 'Attendance Report', 'assets/attendance_report.png', '/attendance_record_screen'),
                 ],
               ),
               const SizedBox(height: 16),
@@ -229,7 +220,12 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
         onTap: (index) {
           switch (index) {
             case 0:
-              _scrollToTop();
+              // Scroll to top when Home is tapped
+              _scrollController.animateTo(
+                0.0,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOut,
+              );
               break;
             case 1:
               Navigator.pushNamed(context, '/profile_screen');
@@ -249,8 +245,10 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
         Navigator.pushNamed(context, routeName);
       },
       child: Container(
-        width: 100, // Adjust width to fit items in a single line with padding
+        width: 100, // Adjust width to fit items with multiline text
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Image.asset(assetPath, width: 40, height: 40),
             const SizedBox(height: 4),
@@ -259,8 +257,10 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 14,
-                overflow: TextOverflow.ellipsis,
+                overflow: TextOverflow.visible, // Allow multiline text
               ),
+              maxLines: 2, // Limit text to two lines
+              softWrap: true,
             ),
           ],
         ),
