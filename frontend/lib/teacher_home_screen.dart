@@ -3,10 +3,10 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'reminder_screen.dart';
-import 'take_attendance_page.dart';
-import 'student_list_page.dart';
-import 'reports_page.dart';
-import 'settings_screen.dart'; // Import the SettingsScreen
+import 'take_attendance_screen.dart';
+import 'student_list_screen.dart';
+import 'teacher_reports_screen.dart';
+import 'settings_screen.dart'; 
 
 class TeacherHomeScreen extends StatefulWidget {
   const TeacherHomeScreen({super.key});
@@ -65,7 +65,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.brown,
+        backgroundColor: Colors.brown[400],
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -237,8 +237,8 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
         ),
         child: TableCalendar(
           focusedDay: _selectedDay,
-          firstDay: DateTime.utc(2020, 1, 1),
-          lastDay: DateTime.utc(2120, 12, 31),
+          firstDay: DateTime(2020, 1, 1),
+          lastDay: DateTime(2120, 12, 31),
           selectedDayPredicate: (day) => isSameDay(day, _selectedDay),
           onDaySelected: (selectedDay, focusedDay) {
             setState(() {
@@ -341,7 +341,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                   MaterialPageRoute(
                     builder: (context) => AddReminderScreen(
                       onReminderAdded: () {
-                        _loadReminders(); // Reload reminders after adding a new one
+                        _loadReminders();
                       },
                     ),
                   ),
