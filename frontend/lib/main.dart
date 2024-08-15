@@ -10,7 +10,13 @@ import 'teacher_register_screen.dart';
 import 'attendance_provider.dart';
 import 'settings_screen.dart';
 import 'recent_courses_screen.dart'; 
-import 'reminder_screen.dart'; 
+import 'reminder_screen.dart';
+import 'student_home_screen.dart'; 
+import 'leave_note_screen.dart'; 
+import 'events_screen.dart'; 
+import 'student_attendance_report_screen.dart'; 
+import 'student_profile_screen.dart'; 
+import 'help_screen.dart';
 
 void main() {
   _setupLogging();
@@ -20,7 +26,6 @@ void main() {
 void _setupLogging() {
   Logger.root.level = Level.ALL; // defaults to Level.INFO
   Logger.root.onRecord.listen((record) {
-    // This is just a simple logging setup. You can customize it as per your needs.
     print('${record.level.name}: ${record.time}: ${record.message}');
   });
 }
@@ -39,7 +44,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'AttendMe',
         theme: ThemeData(
-          primarySwatch: Colors.blue,
+          primarySwatch: Colors.brown, // Adjusted to match your theme
         ),
         initialRoute: '/',
         routes: {
@@ -51,7 +56,13 @@ class MyApp extends StatelessWidget {
           '/teacher_register': (context) => const TeacherRegisterScreen(),
           '/settings_screen': (context) => const SettingsScreen(),
           '/recent_courses_screen': (context) => const RecentCoursesScreen(),
-          '/reminder_screen': (context) => const AddReminderScreen(), 
+          '/reminder_screen': (context) => const AddReminderScreen(),
+          '/student_home_screen': (context) => const StudentHomeScreen(), // Add the StudentHomeScreen route
+          '/leave_note_screen': (context) => const LeaveNoteScreen(), // Add the LeaveNoteScreen route
+          '/events_screen': (context) => const EventsScreen(), // Add the EventsScreen route
+          '/student_attendance_report_screen': (context) => const StudentAttendanceReportScreen(), // Add the StudentAttendanceReportScreen route
+          '/student_profile_screen': (context) => const StudentProfileScreen(), // Add the StudentProfileScreen route
+          '/help_screen': (context) => HelpScreen(),
         },
       ),
     );

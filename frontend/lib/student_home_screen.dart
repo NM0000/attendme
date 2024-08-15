@@ -59,6 +59,8 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
   @override
   Widget build(BuildContext context) {
     String currentDate = DateFormat.yMMMMd().format(DateTime.now());
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
 
     // Get the AttendanceProvider from the context
     final attendanceProvider = Provider.of<AttendanceProvider>(context);
@@ -87,7 +89,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
       body: SingleChildScrollView(
         controller: _scrollController,
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05, vertical: screenHeight * 0.02),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -95,22 +97,25 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Welcome, $userName',
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+                  Flexible(
+                    child: Text(
+                      'Welcome, $userName',
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.05,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   Text(
                     currentDate,
-                    style: const TextStyle(
-                      fontSize: 16,
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.04,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: screenHeight * 0.02),
 
               // Calendar Section
               Container(
@@ -126,7 +131,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                     ),
                   ],
                 ),
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(screenWidth * 0.03),
                 child: TableCalendar(
                   focusedDay: _selectedDay,
                   firstDay: DateTime.utc(2020, 1, 1),
@@ -142,19 +147,31 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                     final dateStr = DateFormat.yMd().format(day);
                     return _reminders[dateStr] ?? [];
                   },
-                  calendarStyle: const CalendarStyle(
+                  calendarStyle: CalendarStyle(
                     todayDecoration: BoxDecoration(
-                      color: Colors.blueAccent,
+                      border: Border.all(color: Colors.blue, width: 2),
                       shape: BoxShape.circle,
                     ),
                     selectedDecoration: BoxDecoration(
-                      color: Colors.orange,
+                      color: Colors.blue,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.blue, width: 2), // Outer ring
+                    ),
+                    selectedTextStyle: TextStyle(
+                      color: Colors.transparent, // Inner part transparent
+                    ),
+                    defaultDecoration: BoxDecoration(
+                      color: Colors.transparent,
+                      shape: BoxShape.circle,
+                    ),
+                    weekendDecoration: BoxDecoration(
+                      color: Colors.transparent,
                       shape: BoxShape.circle,
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: screenHeight * 0.02),
 
               // Quick Access Section
               const Text(
@@ -164,16 +181,16 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: screenHeight * 0.01),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildQuickAccessItem(context, 'Events', 'assets/event.png', '/events_screen'),
-                  _buildQuickAccessItem(context, 'Leave Note', 'assets/leave_notes.png', '/leave_note_screen'),
-                  _buildQuickAccessItem(context, 'Attendance Report', 'assets/attendance_report.png', '/attendance_record_screen'),
+                  _buildQuickAccessItem(context, 'Events', Icons.event, '/events_screen'),
+                  _buildQuickAccessItem(context, 'Leave Note', Icons.note_add, '/leave_note_screen'),
+                  _buildQuickAccessItem(context, 'Attendance Report', Icons.receipt, '/student_attendance_report_screen'),
                 ],
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: screenHeight * 0.02),
 
               // Attendance History Section
               Row(
@@ -188,14 +205,14 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                   ),
                   TextButton(
                     onPressed: () {
-                      // Show all attendance history
+                      _showAllAttendanceHistoryDialog();
                     },
                     child: const Text('See All'),
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
-              ...attendanceProvider.attendanceData.entries.map((entry) {
+              SizedBox(height: screenHeight * 0.01),
+              ...attendanceProvider.attendanceData.entries.take(5).map((entry) {
                 return _buildAttendanceHistoryItem(entry.key, entry.value ? 'Present' : 'Absent', 'Subject: Example');
               }).toList(),
             ],
@@ -228,7 +245,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
               );
               break;
             case 1:
-              Navigator.pushNamed(context, '/profile_screen');
+              Navigator.pushNamed(context, '/student_profile_screen');
               break;
             case 2:
               _showMenu(context);
@@ -239,27 +256,29 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
     );
   }
 
-  Widget _buildQuickAccessItem(BuildContext context, String title, String assetPath, String routeName) {
+  Widget _buildQuickAccessItem(BuildContext context, String title, IconData icon, String routeName) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return GestureDetector(
       onTap: () {
         Navigator.pushNamed(context, routeName);
       },
       child: Container(
-        width: 100, // Adjust width to fit items with multiline text
+        width: screenWidth * 0.25, // Adjust width based on screen size
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Image.asset(assetPath, width: 40, height: 40),
-            const SizedBox(height: 4),
+            Icon(icon, color: Colors.brown, size: screenWidth * 0.1), // Adjust icon size
+            SizedBox(height: 4),
             Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 14,
-                overflow: TextOverflow.visible, // Allow multiline text
+              style: TextStyle(
+                fontSize: screenWidth * 0.04,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 2, // Limit text to two lines
+              maxLines: 2,
               softWrap: true,
             ),
           ],
@@ -270,8 +289,8 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
 
   Widget _buildAttendanceHistoryItem(String date, String title, String subtitle) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 8.0),
+      padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8.0),
@@ -281,24 +300,14 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
             spreadRadius: 1,
             blurRadius: 7,
             offset: const Offset(0, 3),
+         
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            date,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(title),
-          const SizedBox(height: 4),
-          Text(subtitle),
-        ],
+      child: ListTile(
+        title: Text(date, style: TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text(subtitle),
+        trailing: Text(title),
       ),
     );
   }
@@ -309,18 +318,41 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
 
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (context) {
         return AlertDialog(
-          title: Text(DateFormat.yMMMMd().format(selectedDay)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: remindersForDay.isEmpty
-                ? [const Text('No reminders for this day.')]
-                : remindersForDay
-                    .map((reminder) => ListTile(
-                          title: Text(reminder),
-                        ))
+          title: Text('Reminders for ${DateFormat.yMMMd().format(selectedDay)}'),
+          content: remindersForDay.isEmpty
+              ? const Text('No reminders for this day.')
+              : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: remindersForDay.map((reminder) => Text(reminder)).toList(),
+                ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showAllAttendanceHistoryDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Attendance History'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                ...Provider.of<AttendanceProvider>(context)
+                    .attendanceData.entries
+                    .map((entry) => _buildAttendanceHistoryItem(entry.key, entry.value ? 'Present' : 'Absent', 'Subject: Example'))
                     .toList(),
+              ],
+            ),
           ),
           actions: [
             TextButton(
@@ -336,25 +368,27 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
   void _showMenu(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      builder: (BuildContext context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.book),
-              title: const Text('Recent Courses'),
-              onTap: () {
-                Navigator.pushNamed(context, '/recent_courses_screen');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('Settings'),
-              onTap: () {
-                Navigator.pushNamed(context, '/settings_screen');
-              },
-            ),
-          ],
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.book, color: Colors.black),
+                title: Text('Recent Courses'),
+                onTap: () {
+                  Navigator.pushNamed(context, '/recent_courses_screen');
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.settings, color: Colors.black),
+                title: Text('Settings'),
+                onTap: () {
+                  Navigator.pushNamed(context, '/settings_screen');
+                },
+              ),
+            ],
+          ),
         );
       },
     );

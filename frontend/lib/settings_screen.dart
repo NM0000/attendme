@@ -136,35 +136,62 @@ class SettingsScreen extends StatelessWidget {
           ),
         ),
         backgroundColor: Colors.brown,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            ElevatedButton.icon(
-              onPressed: () {
-                _showChangePasswordDialog(context);
-              },
-              icon: const Icon(Icons.lock, size: 30),
-              label: const Text('Change Password'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                textStyle: const TextStyle(fontSize: 18),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              ElevatedButton.icon(
+                onPressed: () {
+                  _showChangePasswordDialog(context);
+                },
+                icon: const Icon(Icons.lock, size: 30),
+                label: const Text('Change Password'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  textStyle: const TextStyle(fontSize: 18),
+                  backgroundColor: Colors.brown,
+                  foregroundColor: Colors.white,
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              onPressed: () {
-                _showLogoutConfirmation(context);
-              },
-              icon: const Icon(Icons.logout, size: 30),
-              label: const Text('Log Out'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                textStyle: const TextStyle(fontSize: 18),
+              const SizedBox(height: 20),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/help_screen');
+                },
+                icon: const Icon(Icons.help, size: 30),
+                label: const Text('Help'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  textStyle: const TextStyle(fontSize: 18),
+                  backgroundColor: Colors.brown,
+                  foregroundColor: Colors.white,
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 20),
+              ElevatedButton.icon(
+                onPressed: () {
+                  _showLogoutConfirmation(context);
+                },
+                icon: const Icon(Icons.logout, size: 30),
+                label: const Text('Log Out'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  textStyle: const TextStyle(fontSize: 18),
+                  backgroundColor: Colors.brown,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

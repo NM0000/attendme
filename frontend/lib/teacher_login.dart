@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'teacher_home_screen.dart';
-import 'forgot_password_screen.dart'; 
+import 'forgot_password_screen.dart';
 
 class TeacherLoginScreen extends StatefulWidget {
   const TeacherLoginScreen({super.key});
@@ -67,7 +67,11 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
               onTap: () {
                 Navigator.pop(context);
               },
-              child: Image.asset('assets/Back.png', width: 40, height: 40),
+              child: Icon(
+                Icons.arrow_back,
+                color: Colors.brown[800], // Deep Brown color
+                size: 40,
+              ),
             ),
           ),
           Center(
@@ -82,7 +86,7 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
                     'Welcome to Attend Me',
                     style: TextStyle(
                       fontSize: 24,
-                      color: Colors.brown,
+                      color: Colors.brown, // Sombre Brown
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -90,7 +94,7 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
                     'Log In',
                     style: TextStyle(
                       fontSize: 24,
-                      color: Colors.brown,
+                      color: Colors.brown, // Sombre Brown
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -101,9 +105,10 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
                       children: <Widget>[
                         TextFormField(
                           controller: _emailController,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: 'Teacher Id/ Email',
                             border: OutlineInputBorder(),
+                            labelStyle: TextStyle(color: Colors.brown), // Sombre Brown
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -115,9 +120,10 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
                         const SizedBox(height: 20),
                         TextFormField(
                           controller: _passwordController,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: 'Password',
                             border: OutlineInputBorder(),
+                            labelStyle: TextStyle(color: Colors.brown), // Sombre Brown
                           ),
                           obscureText: true,
                           validator: (value) {
@@ -137,12 +143,33 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
                               ),
                             );
                           },
-                          child: const Text('Forgot Password?'),
+                          child: const Text(
+                            'Forgot Password?',
+                            style: TextStyle(
+                              color: Colors.blue, // Highlight Color
+                            ),
+                          ),
                         ),
                         const SizedBox(height: 20),
                         GestureDetector(
                           onTap: _login,
-                          child: Image.asset('assets/loginreal.png', width: 100),
+                          child: Container(
+                            padding: const EdgeInsets.all(16.0),
+                            decoration: BoxDecoration(
+                              color: Colors.brown, // Sombre Brown
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            child: Center(
+                              child: Text(
+                                'Log In',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ),
