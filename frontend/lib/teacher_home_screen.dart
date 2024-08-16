@@ -3,7 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'reminder_screen.dart';
-import 'take_attendance_screen.dart';
+import 'live_face_recognition_page.dart';
+//import 'take_attendance_screen.dart';
 import 'student_list_screen.dart';
 import 'teacher_reports_screen.dart';
 import 'settings_screen.dart'; 
@@ -121,7 +122,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
               const SizedBox(height: 8),
               Column(
                 children: [
-                  _buildQuickAccessItem(context, 'Take Attendance', 'assets/takeattendance.png', TakeAttendancePage()),
+                  _buildQuickAccessItem(context, 'Take Attendance', 'assets/takeattendance.png', LiveFaceRecognitionPage()),
                   _buildQuickAccessItem(context, 'Student List', 'assets/studentlist.png', StudentListPage()),
                   _buildQuickAccessItem(context, 'Reports', 'assets/report.png', ReportsPage()),
                 ],

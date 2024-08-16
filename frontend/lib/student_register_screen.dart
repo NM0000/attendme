@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'choose_option_screen.dart';
-import 'live_face_recognization_screen.dart';
+import 'face_capture_screen.dart';
 
 class StudentRegisterScreen extends StatefulWidget {
   const StudentRegisterScreen({super.key});
@@ -26,7 +26,7 @@ class _StudentRegisterScreenState extends State<StudentRegisterScreen> {
   Future<void> _navigateToCaptureScreen() async {
     final recognizedFaces = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => LiveFaceRecognitionPage()),
+      MaterialPageRoute(builder: (context) => FaceCaptureScreen()),
     );
 
     if (recognizedFaces != null && recognizedFaces is List<String>) {

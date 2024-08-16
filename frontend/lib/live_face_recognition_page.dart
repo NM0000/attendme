@@ -19,16 +19,27 @@ class _LiveFaceRecognitionPageState extends State<LiveFaceRecognitionPage> {
   }
 
   Future<void> _initializeCamera() async {
-    final cameras = await availableCameras();
-    final firstCamera = cameras.first;
+    try {
+      final cameras = await availableCameras();
+      if (cameras.isEmpty) {
+        throw Exception('No cameras available');
+      }
 
-    _controller = CameraController(
-      firstCamera,
-      ResolutionPreset.high,
-      enableAudio: false,
-    );
+      final firstCamera = cameras.first;
 
-    _initializeControllerFuture = _controller.initialize();
+      _controller = CameraController(
+        firstCamera,
+        ResolutionPreset.high,
+        enableAudio: false,
+      );
+
+      _initializeControllerFuture = _controller.initialize();
+    } catch (e) {
+      print('Error initializing camera: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Camera initialization failed: $e')),
+      );
+    }
   }
 
   @override
@@ -40,15 +51,19 @@ class _LiveFaceRecognitionPageState extends State<LiveFaceRecognitionPage> {
   Future<void> _startRecording() async {
     await _initializeControllerFuture;
 
+    if (!_controller.value.isInitialized || _isRecording) return;
+
     setState(() {
       _isRecording = true;
     });
 
     _controller.startImageStream((CameraImage image) async {
       List<String> faces = await _recognizeFaces(image);
-      setState(() {
-        detectedFaces = faces;
-      });
+      if (mounted) { // Check if the widget is still in the widget tree
+        setState(() {
+          detectedFaces = faces;
+        });
+      }
     });
   }
 
@@ -70,18 +85,12 @@ class _LiveFaceRecognitionPageState extends State<LiveFaceRecognitionPage> {
     // Replace the following with your actual ML model inference
     //final detectedFaces = await yourMLModel.runInference(image);
 
-    // If no faces are detected, return an empty list
-    if (detectedFaces.isEmpty) {
-      return [];
-    }
+    // Simulate detected faces for demonstration purposes
+    await Future.delayed(Duration(milliseconds: 100)); // Simulate processing time
 
-    // Otherwise, return the names or IDs of detected faces
-    List<String> recognizedFaceNames = [];
-    for (var face in detectedFaces) {
-      // Add recognized face name or ID to the list
-      //recognizedFaceNames.add(face.name); UNCOMMRNT LINE AFTER ML
-    }
-
+    // Placeholder for detected faces
+    List<String> recognizedFaceNames = []; 
+    // Add recognized face names or IDs to the list
     return recognizedFaceNames;
   }
 
@@ -135,4 +144,3 @@ class _LiveFaceRecognitionPageState extends State<LiveFaceRecognitionPage> {
     );
   }
 }
-
