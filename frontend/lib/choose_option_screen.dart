@@ -1,4 +1,6 @@
+//changes done
 import 'package:flutter/material.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'student_login.dart';
 import 'teacher_login.dart';
 import 'student_register_screen.dart';
@@ -10,9 +12,8 @@ class ChooseOptionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-
+    final isMobile = ResponsiveBreakpoints.of(context).isMobile;
+    
     return Scaffold(
       backgroundColor: Colors.brown[200],
       body: Stack(
@@ -23,7 +24,7 @@ class ChooseOptionScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Container(
-                    padding: EdgeInsets.all(screenWidth * 0.04),
+                    padding: EdgeInsets.all(isMobile ? 12.0 : 16.0),
                     decoration: BoxDecoration(
                       color: Colors.grey[300],
                       borderRadius: BorderRadius.circular(16.0),
@@ -33,19 +34,19 @@ class ChooseOptionScreen extends StatelessWidget {
                         Text(
                           'Attend Me',
                           style: TextStyle(
-                            fontSize: screenWidth * 0.1, // Responsive font size
+                            fontSize: isMobile ? 20.0 : 24.0,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: screenHeight * 0.02),
+                        SizedBox(height: isMobile ? 12.0 : 16.0),
                         Text(
                           'Who are you?',
                           style: TextStyle(
-                            fontSize: screenWidth * 0.08, // Responsive font size
+                            fontSize: isMobile ? 18.0 : 20.0,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: screenHeight * 0.04),
+                        SizedBox(height: isMobile ? 24.0 : 32.0),
                         OptionButton(
                           text: 'Student',
                           color: Colors.teal[300]!,
@@ -57,10 +58,10 @@ class ChooseOptionScreen extends StatelessWidget {
                                   builder: (context) => const StudentLoginScreen()),
                             );
                           },
-                          imageSize: screenWidth * 0.2, // Increased image size
-                          heightIncrease: 0.1, // Increased height multiplier
+                          imageSize: isMobile ? 60.0 : 80.0,
+                          heightIncrease: 0.1,
                         ),
-                        SizedBox(height: screenHeight * 0.04),
+                        SizedBox(height: isMobile ? 24.0 : 32.0),
                         OptionButton(
                           text: 'Teacher',
                           color: Colors.orange[300]!,
@@ -72,18 +73,18 @@ class ChooseOptionScreen extends StatelessWidget {
                                   builder: (context) => const TeacherLoginScreen()),
                             );
                           },
-                          imageSize: screenWidth * 0.2, // Increased image size
-                          heightIncrease: 0.1, // Increased height multiplier
+                          imageSize: isMobile ? 60.0 : 80.0,
+                          heightIncrease: 0.1,
                         ),
-                        SizedBox(height: screenHeight * 0.06),
+                        SizedBox(height: isMobile ? 32.0 : 48.0),
                         GestureDetector(
                           onTap: () {
                             showModalBottomSheet(
                               context: context,
                               builder: (BuildContext context) {
                                 return Container(
-                                  padding: EdgeInsets.all(screenWidth * 0.05),
-                                  decoration: const BoxDecoration(
+                                  padding: EdgeInsets.all(isMobile ? 12.0 : 16.0),
+                                  decoration: BoxDecoration(
                                     color: Colors.grey,
                                     borderRadius: BorderRadius.only(
                                       topLeft: Radius.circular(20.0),
@@ -93,7 +94,7 @@ class ChooseOptionScreen extends StatelessWidget {
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      SizedBox(height: screenHeight * 0.02),
+                                      SizedBox(height: isMobile ? 12.0 : 16.0),
                                       Row(
                                         children: [
                                           Expanded(
@@ -111,10 +112,10 @@ class ChooseOptionScreen extends StatelessWidget {
                                               },
                                               textAlign: TextAlign.center,
                                               heightIncrease: 0.05,
-                                              imageSize: screenWidth * 0.2, // Responsive image size
+                                              imageSize: isMobile ? 60.0 : 80.0,
                                             ),
                                           ),
-                                          SizedBox(width: screenWidth * 0.04),
+                                          SizedBox(width: isMobile ? 12.0 : 16.0),
                                           Expanded(
                                             child: OptionButton(
                                               text: 'Register\nAs\nTeacher',
@@ -130,7 +131,7 @@ class ChooseOptionScreen extends StatelessWidget {
                                               },
                                               textAlign: TextAlign.center,
                                               heightIncrease: 0.05,
-                                              imageSize: screenWidth * 0.2, // Responsive image size
+                                              imageSize: isMobile ? 60.0 : 80.0,
                                             ),
                                           ),
                                         ],
@@ -145,8 +146,8 @@ class ChooseOptionScreen extends StatelessWidget {
                             "Don't have an account? Sign up",
                             style: TextStyle(
                               color: Colors.indigo[900],
-                              fontSize: screenWidth * 0.04, // Responsive font size
-                              decoration: TextDecoration.none, // Removed underline
+                              fontSize: isMobile ? 14.0 : 16.0,
+                              decoration: TextDecoration.none,
                             ),
                           ),
                         ),
@@ -158,11 +159,11 @@ class ChooseOptionScreen extends StatelessWidget {
             ),
           ),
           Positioned(
-            top: screenHeight * 0.05,
-            left: screenWidth * 0.02,
+            top: isMobile ? 16.0 : 40.0,
+            left: isMobile ? 8.0 : 16.0,
             child: IconButton(
               icon: Icon(Icons.arrow_back),
-              iconSize: screenWidth * 0.08, // Responsive icon size
+              iconSize: isMobile ? 24.0 : 32.0,
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
@@ -202,8 +203,8 @@ class OptionButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: MediaQuery.of(context).size.width * 0.45,
-        height: 200 * (1 + heightIncrease), // Adjusted height based on the multiplier
+        width: 150.0,
+        height: 200.0 * (1 + heightIncrease),
         padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
           color: color,
@@ -216,11 +217,11 @@ class OptionButton extends StatelessWidget {
               text,
               textAlign: textAlign,
               style: TextStyle(
-                fontSize: MediaQuery.of(context).size.width * 0.06, // Responsive font size
+                fontSize: 16.0,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+            SizedBox(height: 16.0),
             Image.asset(
               imagePath,
               width: imageSize,

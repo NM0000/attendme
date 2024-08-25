@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:logging/logging.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'landing_screen.dart';
 import 'choose_option_screen.dart';
 import 'student_login.dart';
@@ -46,6 +47,15 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.brown, // Adjusted to match your theme
         ),
+        builder: (context, child) => ResponsiveBreakpoints.builder(
+          child: child!,
+          breakpoints: [
+            const Breakpoint(start: 0, end: 450, name: MOBILE),
+            const Breakpoint(start: 451, end: 800, name: TABLET),
+            const Breakpoint(start: 801, end: 1200, name: DESKTOP),
+            const Breakpoint(start: 1201, end: double.infinity, name: '4K'),
+          ],
+        ),
         initialRoute: '/',
         routes: {
           '/': (context) => const LandingScreen(),
@@ -62,7 +72,7 @@ class MyApp extends StatelessWidget {
           '/events_screen': (context) => const EventsScreen(), // Add the EventsScreen route
           '/student_attendance_report_screen': (context) => const StudentAttendanceReportScreen(), // Add the StudentAttendanceReportScreen route
           '/student_profile_screen': (context) => const StudentProfileScreen(), // Add the StudentProfileScreen route
-          '/help_screen': (context) => HelpScreen(),
+          '/help_screen': (context) => const HelpScreen(), // Add the HelpScreen route
         },
       ),
     );

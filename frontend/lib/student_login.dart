@@ -1,3 +1,4 @@
+//changes done
 import 'package:flutter/material.dart';
 import 'student_home_screen.dart';
 import 'forgot_password_screen.dart';
@@ -56,56 +57,69 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Stack(
-        children: <Widget>[
-          Positioned(
-            top: 50,
-            left: 10,
-            child: GestureDetector(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: Icon(
-                Icons.arrow_back,
-                color: Colors.brown[800], // Deep Brown color
-                size: 40,
+      body: SingleChildScrollView(
+        child: Stack(
+          children: <Widget>[
+            Positioned(
+              top: screenHeight * 0.05,
+              left: screenWidth * 0.03,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: Icon(
+                  Icons.arrow_back,
+                  color: Colors.brown[800], // Deep Brown color
+                  size: screenWidth * 0.1,
+                ),
               ),
             ),
-          ),
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: screenWidth * 0.04,
+                vertical: MediaQuery.of(context).viewInsets.bottom > 0
+                    ? screenHeight * 0.05
+                    : screenHeight * 0.02,
+              ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Image.asset('assets/logo.png', width: 150, height: 150),
-                  const SizedBox(height: 20),
-                  const Text(
+                  SizedBox(height: screenHeight * 0.1),
+                  Image.asset(
+                    'assets/logo.png',
+                    width: screenWidth * 0.4,
+                    height: screenHeight * 0.2,
+                  ),
+                  SizedBox(height: screenHeight * 0.02),
+                  Text(
                     'Welcome to Attend Me',
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: screenWidth * 0.06,
                       color: Colors.brown, // Sombre Brown
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const Text(
+                  Text(
                     'Log In',
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: screenWidth * 0.06,
                       color: Colors.brown, // Sombre Brown
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: screenHeight * 0.02),
                   Form(
                     key: _formKey,
                     child: Column(
                       children: <Widget>[
                         TextFormField(
                           controller: _emailController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Student Id/ Email',
                             border: OutlineInputBorder(),
                             labelStyle: TextStyle(color: Colors.brown), // Sombre Brown
@@ -117,10 +131,10 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 20),
+                        SizedBox(height: screenHeight * 0.02),
                         TextFormField(
                           controller: _passwordController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Password',
                             border: OutlineInputBorder(),
                             labelStyle: TextStyle(color: Colors.brown), // Sombre Brown
@@ -133,7 +147,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 20),
+                        SizedBox(height: screenHeight * 0.02),
                         TextButton(
                           onPressed: () {
                             Navigator.push(
@@ -143,28 +157,29 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                               ),
                             );
                           },
-                          child: const Text(
+                          child: Text(
                             'Forgot Password?',
                             style: TextStyle(
-                              color: Colors.blue, // Highlight Color
+                              color: Colors.blue,
+                              fontSize: screenWidth * 0.045, // Highlight Color
                             ),
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        SizedBox(height: screenHeight * 0.02),
                         GestureDetector(
                           onTap: _login,
                           child: Container(
-                            padding: const EdgeInsets.all(16.0),
+                            padding: EdgeInsets.all(screenWidth * 0.04),
                             decoration: BoxDecoration(
                               color: Colors.brown, // Sombre Brown
-                              borderRadius: BorderRadius.circular(8.0),
+                              borderRadius: BorderRadius.circular(screenWidth * 0.02),
                             ),
                             child: Center(
                               child: Text(
                                 'Log In',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 18,
+                                  fontSize: screenWidth * 0.05,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -177,8 +192,8 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

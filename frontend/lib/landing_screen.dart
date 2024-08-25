@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'choose_option_screen.dart';
 
 class LandingScreen extends StatefulWidget {
@@ -53,47 +54,96 @@ class _LandingScreenState extends State<LandingScreen> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
-    // Get screen size
-    final mediaQuery = MediaQuery.of(context);
-    final screenWidth = mediaQuery.size.width;
-
-    // Calculate sizes based on screen dimensions
-    final logoSize = screenWidth * 0.5;
-    final nextIconSize = screenWidth * 0.3;
-    final textSize = screenWidth * 0.1;
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
+          padding: EdgeInsets.symmetric(
+            horizontal: ResponsiveValue<double>(
+              context,
+              defaultValue: 40.0,
+              conditionalValues: [
+                Condition.smallerThan(name: MOBILE, value: 20.0),
+                Condition.largerThan(name: TABLET, value: 60.0),
+              ],
+            ).value,
+          ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Image.asset(
                 'assets/logo.png',
-                width: logoSize,
-                height: logoSize,
+                width: ResponsiveValue<double>(
+                  context,
+                  defaultValue: 200.0,
+                  conditionalValues: [
+                    Condition.smallerThan(name: MOBILE, value: 120.0),
+                    Condition.largerThan(name: TABLET, value: 240.0),
+                  ],
+                ).value,
+                height: ResponsiveValue<double>(
+                  context,
+                  defaultValue: 200.0,
+                  conditionalValues: [
+                    Condition.smallerThan(name: MOBILE, value: 120.0),
+                    Condition.largerThan(name: TABLET, value: 240.0),
+                  ],
+                ).value,
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: ResponsiveValue<double>(
+                context,
+                defaultValue: 20.0,
+                conditionalValues: [
+                  Condition.smallerThan(name: MOBILE, value: 10.0),
+                  Condition.largerThan(name: TABLET, value: 30.0),
+                ],
+              ).value),
               Text(
                 'AttendMe',
                 style: TextStyle(
-                  fontSize: textSize,
+                  fontSize: ResponsiveValue<double>(
+                    context,
+                    defaultValue: 24.0,
+                    conditionalValues: [
+                      Condition.smallerThan(name: MOBILE, value: 18.0),
+                      Condition.largerThan(name: TABLET, value: 28.0),
+                    ],
+                  ).value,
                   color: Colors.green,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 20),
-              const Text(
+              SizedBox(height: ResponsiveValue<double>(
+                context,
+                defaultValue: 20.0,
+                conditionalValues: [
+                  Condition.smallerThan(name: MOBILE, value: 10.0),
+                  Condition.largerThan(name: TABLET, value: 30.0),
+                ],
+              ).value),
+              Text(
                 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: ResponsiveValue<double>(
+                    context,
+                    defaultValue: 16.0,
+                    conditionalValues: [
+                      Condition.smallerThan(name: MOBILE, value: 14.0),
+                      Condition.largerThan(name: TABLET, value: 18.0),
+                    ],
+                  ).value,
                   color: Colors.grey,
                 ),
               ),
-              const SizedBox(height: 50),
+              SizedBox(height: ResponsiveValue<double>(
+                context,
+                defaultValue: 50.0,
+                conditionalValues: [
+                  Condition.smallerThan(name: MOBILE, value: 30.0),
+                  Condition.largerThan(name: TABLET, value: 60.0),
+                ],
+              ).value),
               GestureDetector(
                 onTap: () => _navigateToNextScreen(context),
                 child: AnimatedBuilder(
@@ -105,20 +155,48 @@ class _LandingScreenState extends State<LandingScreen> with SingleTickerProvider
                         scale: _scaleAnimation.value,
                         child: Image.asset(
                           'assets/next.png',
-                          width: nextIconSize,
-                          height: nextIconSize,
+                          width: ResponsiveValue<double>(
+                            context,
+                            defaultValue: 100.0,
+                            conditionalValues: [
+                              Condition.smallerThan(name: MOBILE, value: 70.0),
+                              Condition.largerThan(name: TABLET, value: 120.0),
+                            ],
+                          ).value,
+                          height: ResponsiveValue<double>(
+                            context,
+                            defaultValue: 100.0,
+                            conditionalValues: [
+                              Condition.smallerThan(name: MOBILE, value: 70.0),
+                              Condition.largerThan(name: TABLET, value: 120.0),
+                            ],
+                          ).value,
                         ),
                       ),
                     );
                   },
                 ),
               ),
-              const SizedBox(height: 20),
-              const Text(
+              SizedBox(height: ResponsiveValue<double>(
+                context,
+                defaultValue: 20.0,
+                conditionalValues: [
+                  Condition.smallerThan(name: MOBILE, value: 10.0),
+                  Condition.largerThan(name: TABLET, value: 30.0),
+                ],
+              ).value),
+              Text(
                 'Click here to get started',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: ResponsiveValue<double>(
+                    context,
+                    defaultValue: 16.0,
+                    conditionalValues: [
+                      Condition.smallerThan(name: MOBILE, value: 14.0),
+                      Condition.largerThan(name: TABLET, value: 18.0),
+                    ],
+                  ).value,
                   color: Colors.blue,
                   fontWeight: FontWeight.bold,
                 ),

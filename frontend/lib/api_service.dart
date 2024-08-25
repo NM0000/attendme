@@ -1,33 +1,37 @@
-import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class ApiService {
-  final String baseUrl = 'http://127.0.0.1:8000/api/students/';
+  final String baseUrl = "http://192.168.1.2:8000";
 
-  Future<List<Student>> fetchStudents() async {
-    final response = await http.get(Uri.parse(baseUrl));
-
+  Future<List<dynamic>> getStudents() async {
+    final response = await http.get(Uri.parse('$baseUrl/students/'));
     if (response.statusCode == 200) {
-      List jsonResponse = json.decode(response.body);
-      return jsonResponse.map((student) => Student.fromJson(student)).toList();
+      return json.decode(response.body);
     } else {
       throw Exception('Failed to load students');
     }
   }
-}
 
-class Student {
-  final int id;
-  final String name;
-  final String email;
+  Future<http.Response> addStudent(Map<String, dynamic> data) async {
+    return await http.post(
+      Uri.parse('$baseUrl/students/'),
+      headers: {"Content-Type": "application/json"},
+      body: json.encode(data),
+    );
+  }
 
-  Student({required this.id, required this.name, required this.email});
+  Future<http.Response> updateStudent(int id, Map<String, dynamic> data) async {
+    return await http.put(
+      Uri.parse('$baseUrl/students/$id/'),
+      headers: {"Content-Type": "application/json"},
+      body: json.encode(data),
+    );
+  }
 
-  factory Student.fromJson(Map<String, dynamic> json) {
-    return Student(
-      id: json['id'],
-      name: json['name'],
-      email: json['email'],
+  Future<http.Response> deleteStudent(int id) async {
+    return await http.delete(
+      Uri.parse('$baseUrl/students/$id/'),
     );
   }
 }

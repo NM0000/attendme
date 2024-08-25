@@ -21,7 +21,6 @@ class EventsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             // Your events content goes here
-            // For example:
             ListTile(
               leading: const Icon(Icons.event),
               title: const Text('Math Exam'),

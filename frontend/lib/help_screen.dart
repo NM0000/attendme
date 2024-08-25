@@ -68,8 +68,8 @@ class HelpScreen extends StatelessWidget {
               },
               child: const Text('Contact Support'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.brown, // Replaces 'primary'
-                foregroundColor: Colors.white, // Replaces 'onPrimary'
+                backgroundColor: Colors.brown,
+                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 textStyle: const TextStyle(fontSize: 18),
               ),
@@ -80,7 +80,7 @@ class HelpScreen extends StatelessWidget {
     );
   }
 
- void _contactSupport(BuildContext context) async {
+  void _contactSupport(BuildContext context) async {
     final Uri emailUri = Uri(
       scheme: 'mailto',
       path: 'support@example.com',
@@ -104,5 +104,5 @@ class HelpScreen extends StatelessWidget {
         ),
       );
     }
-  } 
+  }
 }

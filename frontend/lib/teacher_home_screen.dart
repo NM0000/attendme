@@ -1,13 +1,13 @@
+//changes done
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'reminder_screen.dart';
-import 'live_face_recognition_page.dart';
-//import 'take_attendance_screen.dart';
+import 'take_attendance_screen.dart';
 import 'student_list_screen.dart';
 import 'teacher_reports_screen.dart';
-import 'settings_screen.dart'; 
+import 'settings_screen.dart';
 
 class TeacherHomeScreen extends StatefulWidget {
   const TeacherHomeScreen({super.key});
@@ -39,8 +39,6 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
     final prefs = await SharedPreferences.getInstance();
     final reminderList = prefs.getStringList('reminders') ?? [];
 
-    print('Loaded reminders: $reminderList'); // Debug: Check loaded reminders
-
     Map<String, List<String>> loadedReminders = {};
 
     for (String reminder in reminderList) {
@@ -61,6 +59,8 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
     String currentDate = DateFormat.yMMMMd().format(DateTime.now());
 
     return Scaffold(
@@ -72,11 +72,12 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
           children: [
             CircleAvatar(
               backgroundColor: Colors.grey[400],
-              child: const Icon(Icons.person, size: 30),
+              radius: screenWidth * 0.06, // Responsive avatar size
+              child: Icon(Icons.person, size: screenWidth * 0.06),
             ),
             const Spacer(),
             IconButton(
-              icon: const Icon(Icons.notifications),
+              icon: Icon(Icons.notifications, size: screenWidth * 0.06),
               onPressed: () {
                 // Handle notifications
               },
@@ -87,7 +88,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       body: SingleChildScrollView(
         controller: _scrollController, // Add a ScrollController
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(screenWidth * 0.04), // Responsive padding
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -95,54 +96,69 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Welcome,',
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: screenWidth * 0.06, // Responsive font size
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
                     teacherName,
-                    style: const TextStyle(
-                      fontSize: 24,
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.06, // Responsive font size
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: screenHeight * 0.01), // Responsive spacing
                   Text(
                     currentDate,
-                    style: const TextStyle(
-                      fontSize: 16,
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.04, // Responsive font size
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-              const SizedBox(height: 8),
+              SizedBox(height: screenHeight * 0.02), // Responsive spacing
+
               Column(
                 children: [
-                  _buildQuickAccessItem(context, 'Take Attendance', 'assets/takeattendance.png', LiveFaceRecognitionPage()),
-                  _buildQuickAccessItem(context, 'Student List', 'assets/studentlist.png', StudentListPage()),
-                  _buildQuickAccessItem(context, 'Reports', 'assets/report.png', ReportsPage()),
+                  _buildQuickAccessItem(
+                      context,
+                      'Take Attendance',
+                      'assets/takeattendance.png',
+                      TakeAttendancePage(),
+                      screenWidth),
+                  _buildQuickAccessItem(
+                      context,
+                      'Student List',
+                      'assets/studentlist.png',
+                      StudentListPage(),
+                      screenWidth),
+                  _buildQuickAccessItem(
+                      context,
+                      'Reports',
+                      'assets/report.png',
+                      ReportsPage(),
+                      screenWidth),
                 ],
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: screenHeight * 0.02), // Responsive spacing
 
               // Calendar Section
-              buildCalendar(),
+              buildCalendar(screenWidth),
             ],
           ),
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: Icon(Icons.home, size: screenWidth * 0.07),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.menu),
+            icon: Icon(Icons.menu, size: screenWidth * 0.07),
             label: 'Menu',
           ),
         ],
@@ -157,7 +173,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
               );
               break;
             case 1:
-              _showMenu(context);
+              _showMenu(context, screenWidth);
               break;
           }
         },
@@ -165,7 +181,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
     );
   }
 
-  Widget _buildQuickAccessItem(BuildContext context, String title, String assetPath, Widget page) {
+  Widget _buildQuickAccessItem(BuildContext context, String title, String assetPath, Widget page, double screenWidth) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -174,12 +190,12 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
         );
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        padding: EdgeInsets.symmetric(vertical: screenWidth * 0.02),
         child: Container(
-          height: 130,
+          height: screenWidth * 0.3, // Responsive container height
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(screenWidth * 0.04), // Responsive border radius
             boxShadow: [
               BoxShadow(
                 color: Colors.grey.withOpacity(0.5),
@@ -193,18 +209,18 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
             children: [
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: EdgeInsets.all(screenWidth * 0.04), // Responsive padding
                   child: Text(
                     title,
-                    style: const TextStyle(
-                      fontSize: 18,
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.05, // Responsive font size
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.all(screenWidth * 0.02),
                 child: AspectRatio(
                   aspectRatio: 1, // Maintain aspect ratio
                   child: Image.asset(
@@ -220,13 +236,13 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
     );
   }
 
-  Widget buildCalendar() {
+  Widget buildCalendar(double screenWidth) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(screenWidth * 0.04), // Responsive padding
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(screenWidth * 0.04), // Responsive border radius
           boxShadow: [
             BoxShadow(
               color: Colors.grey.withOpacity(0.5),
@@ -251,10 +267,14 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
             final dateStr = DateFormat.yMd().format(day);
             return _reminders[dateStr] ?? [];
           },
-          calendarStyle: const CalendarStyle(
+          calendarStyle: CalendarStyle(
             todayDecoration: BoxDecoration(
               color: Colors.blueAccent,
               shape: BoxShape.circle,
+              border: Border.all(
+                color: Colors.blue,
+                width: screenWidth * 0.005, // Responsive border width
+              ),
             ),
             selectedDecoration: BoxDecoration(
               color: Colors.orange,
@@ -289,7 +309,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                           final reminder = entry.value;
                           return ListTile(
                             title: Text(reminder),
-                            trailing: IconButton(
+                                                        trailing: IconButton(
                               icon: const Icon(Icons.delete, color: Colors.red),
                               onPressed: () async {
                                 // Remove the reminder
@@ -326,7 +346,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
     );
   }
 
-  void _showMenu(BuildContext context) {
+  void _showMenu(BuildContext context, double screenWidth) {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -334,8 +354,8 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.add),
-              title: const Text('Add Reminder'),
+              leading: Icon(Icons.add, size: screenWidth * 0.07),
+              title: Text('Add Reminder', style: TextStyle(fontSize: screenWidth * 0.05)),
               onTap: () {
                 Navigator.push(
                   context,
@@ -350,12 +370,12 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('Settings'),
+              leading: Icon(Icons.settings, size: screenWidth * 0.07),
+              title: Text('Settings', style: TextStyle(fontSize: screenWidth * 0.05)),
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => SettingsScreen()), // Navigate to SettingsScreen
+                  MaterialPageRoute(builder: (context) => SettingsScreen()),
                 );
               },
             ),
@@ -365,5 +385,6 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
     );
   }
 
-  final ScrollController _scrollController = ScrollController(); 
+  final ScrollController _scrollController = ScrollController();
 }
+

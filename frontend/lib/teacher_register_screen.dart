@@ -12,19 +12,28 @@ class TeacherRegisterScreen extends StatefulWidget {
 }
 
 class _TeacherRegisterScreenState extends State<TeacherRegisterScreen> {
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _idController = TextEditingController();
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
 
   Future<void> _register() async {
-    if (_idController.text.isNotEmpty && _passwordController.text.isNotEmpty) {
+    if (_formKey.currentState!.validate()) {
+      print("Form is valid, proceeding with registration...");
+
       final response = await http.post(
-        Uri.parse('http://127.0.0.1:8000/api/teachers/register/'),  // Update URL to match API
+        Uri.parse('http://127.0.0.1:8000/api/teachers/register/'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, String>{
           'teacher_id': _idController.text,
+          'first_name': _firstNameController.text,
+          'last_name': _lastNameController.text,
           'password': _passwordController.text,
+          'password2': _confirmPasswordController.text,
         }),
       );
 
@@ -38,7 +47,7 @@ class _TeacherRegisterScreenState extends State<TeacherRegisterScreen> {
           context: context,
           builder: (context) => AlertDialog(
             title: const Text('Success'),
-            content: const Text('Registered successfully.'),
+            content: const Text('Registration successful.'),
             actions: [
               TextButton(
                 onPressed: () {
@@ -48,6 +57,7 @@ class _TeacherRegisterScreenState extends State<TeacherRegisterScreen> {
                         builder: (context) => const ChooseOptionScreen()),
                     (route) => false,
                   );
+                  print("Navigating to ChooseOptionScreen");
                 },
                 child: const Text('OK'),
               ),
@@ -58,93 +68,139 @@ class _TeacherRegisterScreenState extends State<TeacherRegisterScreen> {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Error'),
-            content: Text('Failed to register. Error: ${response.body}'),
+            title: const Text('Registration Failed'),
+            content: const Text('Registration failed. Please try again.'),
             actions: [
               TextButton(
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () => Navigator.pop(context),
                 child: const Text('OK'),
               ),
             ],
           ),
         );
       }
-    } else {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Error'),
-          content: const Text('All fields are required.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
-      backgroundColor: Colors.brown[200],
-      body: Stack(
-        children: [
-          Positioned(
-            top: 50,
-            left: 10,
-            child: GestureDetector(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: Image.asset('assets/Back.png', width: 40, height: 40),
-            ),
-          ),
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(32.0),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'Register as Teacher',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _idController,
-                      decoration: const InputDecoration(
-                        labelText: 'Teacher ID',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _passwordController,
-                      decoration: const InputDecoration(
-                        labelText: 'Password',
-                        border: OutlineInputBorder(),
-                      ),
-                      obscureText: true,
-                    ),
-                    const SizedBox(height: 32),
-                    ElevatedButton(
-                      onPressed: _register,
-                      child: const Text('Register'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
+      appBar: AppBar(
+        backgroundColor: Colors.brown[800],
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, size: screenWidth * 0.06),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
+      backgroundColor: Colors.brown[100],
+      body: Padding(
+        padding: EdgeInsets.all(screenWidth * 0.04), // Dynamic padding
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Register as Teacher',
+                  style: TextStyle(
+                    fontSize: screenWidth * 0.07, // Dynamic font size
+                    fontWeight: FontWeight.bold,
+                    color: Colors.brown[800],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: screenHeight * 0.03),
+                _buildTextFormField(
+                  controller: _idController,
+                  labelText: 'Teacher ID',
+                ),
+                SizedBox(height: screenHeight * 0.02),
+                _buildTextFormField(
+                  controller: _firstNameController,
+                  labelText: 'First Name',
+                ),
+                SizedBox(height: screenHeight * 0.02),
+                _buildTextFormField(
+                  controller: _lastNameController,
+                  labelText: 'Last Name',
+                ),
+                SizedBox(height: screenHeight * 0.02),
+                _buildTextFormField(
+                  controller: _passwordController,
+                  labelText: 'Password',
+                  obscureText: true,
+                ),
+                SizedBox(height: screenHeight * 0.02),
+                _buildTextFormField(
+                  controller: _confirmPasswordController,
+                  labelText: 'Confirm Password',
+                  obscureText: true,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please confirm your password';
+                    }
+                    if (value != _passwordController.text) {
+                      return 'Passwords do not match';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: screenHeight * 0.03),
+                SizedBox(
+                  width: double.infinity, // Full-width button
+                  child: ElevatedButton(
+                    onPressed: _register,
+                    child: Text(
+                      'Register',
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.04, // Dynamic font size
+                        color: Colors.black, // Black text
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(
+                          vertical: screenHeight * 0.015), // Dynamic padding
+                      backgroundColor: Colors.white,
+                      minimumSize: Size(screenWidth * 0.7, screenHeight * 0.05), // Smaller size
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextFormField({
+    required TextEditingController controller,
+    required String labelText,
+    bool obscureText = false,
+    FormFieldValidator<String>? validator,
+  }) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: labelText,
+        border: const OutlineInputBorder(),
+        contentPadding: EdgeInsets.symmetric(
+            horizontal: screenWidth * 0.04, vertical: screenWidth * 0.03),
+      ),
+      obscureText: obscureText,
+      validator: validator ??
+          (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter your $labelText';
+            }
+            return null;
+          },
     );
   }
 }

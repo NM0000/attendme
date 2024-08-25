@@ -1,3 +1,4 @@
+//changes done
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -65,7 +66,7 @@ class _StudentRegisterScreenState extends State<StudentRegisterScreen> {
           context: context,
           builder: (context) => AlertDialog(
             title: const Text('Success'),
-            content: const Text('Registered successfully.'),
+            content: const Text('Registration successful.'),
             actions: [
               TextButton(
                 onPressed: () {
@@ -82,11 +83,10 @@ class _StudentRegisterScreenState extends State<StudentRegisterScreen> {
           ),
         );
       } else {
-        print('Registration failed: ${response.reasonPhrase}');
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Error'),
+            title: const Text('Registration Failed'),
             content: const Text('Registration failed. Please try again.'),
             actions: [
               TextButton(
@@ -116,153 +116,141 @@ class _StudentRegisterScreenState extends State<StudentRegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
-      backgroundColor: Colors.brown[200],
-      body: Stack(
-        children: [
-          Positioned(
-            top: 50,
-            left: 10,
-            child: GestureDetector(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: Image.asset('assets/Back.png', width: 40, height: 40),
-            ),
-          ),
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(32.0),
-              child: SingleChildScrollView(
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        'Register as Student',
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                        ),
+      appBar: AppBar(
+        backgroundColor: Colors.brown[800],
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, size: screenWidth * 0.06),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      backgroundColor: Colors.brown[100],
+      body: Padding(
+        padding: EdgeInsets.all(screenWidth * 0.04), // Dynamic padding
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Register as Student',
+                  style: TextStyle(
+                    fontSize: screenWidth * 0.07, // Dynamic font size
+                    fontWeight: FontWeight.bold,
+                    color: Colors.brown[800],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: screenHeight * 0.02),
+                _buildTextFormField(
+                  controller: _firstNameController,
+                  labelText: 'First Name',
+                ),
+                SizedBox(height: screenHeight * 0.02),
+                _buildTextFormField(
+                  controller: _lastNameController,
+                  labelText: 'Last Name',
+                ),
+                SizedBox(height: screenHeight * 0.02),
+                _buildTextFormField(
+                  controller: _batchController,
+                  labelText: 'Batch',
+                ),
+                SizedBox(height: screenHeight * 0.02),
+                _buildTextFormField(
+                  controller: _enrolledYearController,
+                  labelText: 'Enrolled Year',
+                ),
+                SizedBox(height: screenHeight * 0.02),
+                _buildTextFormField(
+                  controller: _studentIdController,
+                  labelText: 'Student ID',
+                ),
+                SizedBox(height: screenHeight * 0.02),
+                _buildTextFormField(
+                  controller: _passwordController,
+                  labelText: 'Password',
+                  obscureText: true,
+                ),
+                SizedBox(height: screenHeight * 0.02),
+                _buildTextFormField(
+                  controller: _emailController,
+                  labelText: 'Email',
+                ),
+                SizedBox(height: screenHeight * 0.03),
+                SizedBox(
+                  width: double.infinity, // Full-width button
+                  child: ElevatedButton(
+                    onPressed: _navigateToCaptureScreen,
+                    child: Text(
+                      'Capture Face',
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.04, // Smaller font size
+                        color: Colors.black, // Black text
                       ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _firstNameController,
-                        decoration: const InputDecoration(
-                          labelText: 'First Name',
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your first name';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _lastNameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Last Name',
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your last name';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _batchController,
-                        decoration: const InputDecoration(
-                          labelText: 'Batch',
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your batch';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _enrolledYearController,
-                        decoration: const InputDecoration(
-                          labelText: 'Enrolled Year',
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your enrolled year';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _studentIdController,
-                        decoration: const InputDecoration(
-                          labelText: 'Student ID',
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your student ID';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _passwordController,
-                        decoration: const InputDecoration(
-                          labelText: 'Password',
-                          border: OutlineInputBorder(),
-                        ),
-                        obscureText: true,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your password';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _emailController,
-                        decoration: const InputDecoration(
-                          labelText: 'Email',
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your email';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: _navigateToCaptureScreen,
-                        child: const Text('Capture Face'),
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: _register,
-                        child: const Text('Register'),
-                      ),
-                    ],
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(
+                          vertical: screenHeight * 0.015), // Smaller padding
+                      backgroundColor: Colors.white,
+                      minimumSize: Size(screenWidth * 0.7, screenHeight * 0.05), // Smaller size
+                    ),
                   ),
                 ),
-              ),
+                SizedBox(height: screenHeight * 0.02),
+                SizedBox(
+                  width: double.infinity, // Full-width button
+                  child: ElevatedButton(
+                    onPressed: _register,
+                    child: Text(
+                      'Register',
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.04, // Smaller font size
+                        color: Colors.black, // Black text
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(
+                          vertical: screenHeight * 0.015), // Smaller padding
+                      backgroundColor: Colors.white,
+                      minimumSize: Size(screenWidth * 0.7, screenHeight * 0.05), // Smaller size
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildTextFormField({
+    required TextEditingController controller,
+    required String labelText,
+    bool obscureText = false,
+  }) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: labelText,
+        border: OutlineInputBorder(),
+        contentPadding: EdgeInsets.symmetric(
+            horizontal: screenWidth * 0.04, vertical: screenWidth * 0.03),
+      ),
+      obscureText: obscureText,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter your $labelText';
+        }
+        return null;
+      },
     );
   }
 }
