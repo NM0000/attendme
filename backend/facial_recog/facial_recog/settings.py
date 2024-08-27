@@ -131,7 +131,3 @@ REST_FRAMEWORK = {
 AUTH_USER_MODEL = 'authentication.Student'
 AUTH_USER_MODEL = 'authentication.Teacher'
 
-AUTHENTICATION_BACKENDS = [
-    'accounts.backends.StudentIDAuthBackend',
-    'django.contrib.auth.backends.ModelBackend',
-]

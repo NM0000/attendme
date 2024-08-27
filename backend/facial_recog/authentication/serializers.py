@@ -12,7 +12,7 @@ class StudentRegistrationSerializer(serializers.ModelSerializer):
         model = Student
         fields = ['student_id', 'email', 'first_name', 'last_name', 'batch', 'enrolled_year', 'password', 'password2']
         extra_kwargs = {'password': {'write_only': True}}
-
+            
     def validate(self, attrs):
         password = attrs.get('password')
         password2 = attrs.get('password2')
