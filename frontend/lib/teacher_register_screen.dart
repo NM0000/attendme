@@ -18,6 +18,7 @@ class _TeacherRegisterScreenState extends State<TeacherRegisterScreen> {
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _otpController = TextEditingController();
 
   Future<void> _register() async {
     if (_formKey.currentState!.validate()) {
@@ -43,43 +44,71 @@ class _TeacherRegisterScreenState extends State<TeacherRegisterScreen> {
         await prefs.setString('access', responseBody['access']);
         await prefs.setString('refresh', responseBody['refresh']);
 
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Success'),
-            content: const Text('Registration successful.'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const ChooseOptionScreen()),
-                    (route) => false,
-                  );
-                  print("Navigating to ChooseOptionScreen");
-                },
-                child: const Text('OK'),
-              ),
-            ],
-          ),
-        );
+        _showOtpDialog();
       } else {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Registration Failed'),
-            content: const Text('Registration failed. Please try again.'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('OK'),
-              ),
-            ],
-          ),
-        );
+        _showFailureDialog('Registration failed. Please try again.');
       }
     }
+  }
+
+  void _showOtpDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Enter OTP'),
+          content: TextField(
+            controller: _otpController,
+            decoration: const InputDecoration(hintText: 'OTP'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: _verifyOtp,
+              child: const Text('Verify'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _verifyOtp() async {
+    final response = await http.post(
+      Uri.parse('http://127.0.0.1:8000/api/teachers/verify_otp/'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'teacher_id': _idController.text,
+        'otp': _otpController.text,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const ChooseOptionScreen()),
+        (route) => false,
+      );
+    } else {
+      _showFailureDialog('OTP verification failed. Please try again.');
+    }
+  }
+
+  void _showFailureDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -97,7 +126,7 @@ class _TeacherRegisterScreenState extends State<TeacherRegisterScreen> {
       ),
       backgroundColor: Colors.brown[100],
       body: Padding(
-        padding: EdgeInsets.all(screenWidth * 0.04), // Dynamic padding
+        padding: EdgeInsets.all(screenWidth * 0.04),
         child: SingleChildScrollView(
           child: Form(
             key: _formKey,
@@ -107,7 +136,7 @@ class _TeacherRegisterScreenState extends State<TeacherRegisterScreen> {
                 Text(
                   'Register as Teacher',
                   style: TextStyle(
-                    fontSize: screenWidth * 0.07, // Dynamic font size
+                    fontSize: screenWidth * 0.07,
                     fontWeight: FontWeight.bold,
                     color: Colors.brown[800],
                   ),
@@ -151,21 +180,21 @@ class _TeacherRegisterScreenState extends State<TeacherRegisterScreen> {
                 ),
                 SizedBox(height: screenHeight * 0.03),
                 SizedBox(
-                  width: double.infinity, // Full-width button
+                  width: double.infinity,
                   child: ElevatedButton(
                     onPressed: _register,
                     child: Text(
                       'Register',
                       style: TextStyle(
-                        fontSize: screenWidth * 0.04, // Dynamic font size
-                        color: Colors.black, // Black text
+                        fontSize: screenWidth * 0.04,
+                        color: Colors.black,
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.symmetric(
-                          vertical: screenHeight * 0.015), // Dynamic padding
+                          vertical: screenHeight * 0.015),
                       backgroundColor: Colors.white,
-                      minimumSize: Size(screenWidth * 0.7, screenHeight * 0.05), // Smaller size
+                      minimumSize: Size(screenWidth * 0.7, screenHeight * 0.05),
                     ),
                   ),
                 ),

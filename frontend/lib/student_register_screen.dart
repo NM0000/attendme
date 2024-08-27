@@ -1,4 +1,3 @@
-//changes done
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -22,12 +21,15 @@ class _StudentRegisterScreenState extends State<StudentRegisterScreen> {
   final TextEditingController _studentIdController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _otpController = TextEditingController();
   List<String> _recognizedFaces = [];
 
-  Future<void> _navigateToCaptureScreen() async {
+    Future<void> _navigateToCaptureScreen() async {
     final recognizedFaces = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => FaceCaptureScreen()),
+      MaterialPageRoute(
+        builder: (context) => FaceCaptureScreen(studentId: _studentIdController.text),
+      ),
     );
 
     if (recognizedFaces != null && recognizedFaces is List<String>) {
@@ -51,67 +53,92 @@ class _StudentRegisterScreenState extends State<StudentRegisterScreen> {
       request.fields['first_name'] = _firstNameController.text;
       request.fields['last_name'] = _lastNameController.text;
       request.fields['enrolled_year'] = _enrolledYearController.text;
-      request.fields['recognized_faces'] = jsonEncode(_recognizedFaces);
+
+      // Attach images to the request
+      for (String imagePath in _recognizedFaces) {
+        request.files.add(await http.MultipartFile.fromPath(
+          'images',
+          imagePath,
+        ));
+      }
 
       final response = await request.send();
 
       if (response.statusCode == 201) {
-        final responseBody = await http.Response.fromStream(response);
-        final responseData = jsonDecode(responseBody.body);
+        final responseBody = await response.stream.bytesToString();
+        final parsedResponse = jsonDecode(responseBody);
 
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        prefs.setString('token', responseData['token']);
+        await prefs.setString('access', parsedResponse['access']);
+        await prefs.setString('refresh', parsedResponse['refresh']);
 
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Success'),
-            content: const Text('Registration successful.'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const ChooseOptionScreen()),
-                    (route) => false,
-                  );
-                },
-                child: const Text('OK'),
-              ),
-            ],
-          ),
-        );
+        _showOtpDialog();
       } else {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Registration Failed'),
-            content: const Text('Registration failed. Please try again.'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('OK'),
-              ),
-            ],
-          ),
-        );
+        _showFailureDialog('Registration failed. Please try again.');
       }
     } else {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Error'),
-          content: const Text('Please capture your face for recognition.'),
+      _showFailureDialog('Please complete the form and capture your face.');
+    }
+  }
+
+  void _showOtpDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Enter OTP'),
+          content: TextField(
+            controller: _otpController,
+            decoration: const InputDecoration(hintText: 'OTP'),
+          ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
+              onPressed: _verifyOtp,
+              child: const Text('Verify'),
             ),
           ],
-        ),
+        );
+      },
+    );
+  }
+
+  Future<void> _verifyOtp() async {
+    final response = await http.post(
+      Uri.parse('http://127.0.0.1:8000/api/accounts/verify_otp/'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'studentId': _studentIdController.text,
+        'otp': _otpController.text,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const ChooseOptionScreen()),
+        (route) => false,
       );
+    } else {
+      _showFailureDialog('OTP verification failed. Please try again.');
     }
+  }
+
+  void _showFailureDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -129,7 +156,7 @@ class _StudentRegisterScreenState extends State<StudentRegisterScreen> {
       ),
       backgroundColor: Colors.brown[100],
       body: Padding(
-        padding: EdgeInsets.all(screenWidth * 0.04), // Dynamic padding
+        padding: EdgeInsets.all(screenWidth * 0.04),
         child: SingleChildScrollView(
           child: Form(
             key: _formKey,
@@ -139,11 +166,16 @@ class _StudentRegisterScreenState extends State<StudentRegisterScreen> {
                 Text(
                   'Register as Student',
                   style: TextStyle(
-                    fontSize: screenWidth * 0.07, // Dynamic font size
+                    fontSize: screenWidth * 0.07,
                     fontWeight: FontWeight.bold,
                     color: Colors.brown[800],
                   ),
                   textAlign: TextAlign.center,
+                ),
+                SizedBox(height: screenHeight * 0.03),
+                _buildTextFormField(
+                  controller: _studentIdController,
+                  labelText: 'Student ID',
                 ),
                 SizedBox(height: screenHeight * 0.02),
                 _buildTextFormField(
@@ -167,8 +199,8 @@ class _StudentRegisterScreenState extends State<StudentRegisterScreen> {
                 ),
                 SizedBox(height: screenHeight * 0.02),
                 _buildTextFormField(
-                  controller: _studentIdController,
-                  labelText: 'Student ID',
+                  controller: _emailController,
+                  labelText: 'Email',
                 ),
                 SizedBox(height: screenHeight * 0.02),
                 _buildTextFormField(
@@ -176,49 +208,42 @@ class _StudentRegisterScreenState extends State<StudentRegisterScreen> {
                   labelText: 'Password',
                   obscureText: true,
                 ),
-                SizedBox(height: screenHeight * 0.02),
-                _buildTextFormField(
-                  controller: _emailController,
-                  labelText: 'Email',
-                ),
                 SizedBox(height: screenHeight * 0.03),
-                SizedBox(
-                  width: double.infinity, // Full-width button
-                  child: ElevatedButton(
-                    onPressed: _navigateToCaptureScreen,
-                    child: Text(
-                      'Capture Face',
-                      style: TextStyle(
-                        fontSize: screenWidth * 0.04, // Smaller font size
-                        color: Colors.black, // Black text
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(
-                          vertical: screenHeight * 0.015), // Smaller padding
-                      backgroundColor: Colors.white,
-                      minimumSize: Size(screenWidth * 0.7, screenHeight * 0.05), // Smaller size
+                ElevatedButton(
+                  onPressed: _navigateToCaptureScreen,
+                  child: Text(
+                    _recognizedFaces.isEmpty
+                        ? 'Capture Face'
+                        : 'Retake Face Capture',
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.04,
+                      color: Colors.black,
                     ),
                   ),
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(
+                        vertical: screenHeight * 0.015),
+                    backgroundColor: Colors.white,
+                    minimumSize:
+                        Size(screenWidth * 0.7, screenHeight * 0.05),
+                  ),
                 ),
-                SizedBox(height: screenHeight * 0.02),
-                SizedBox(
-                  width: double.infinity, // Full-width button
-                  child: ElevatedButton(
-                    onPressed: _register,
-                    child: Text(
-                      'Register',
-                      style: TextStyle(
-                        fontSize: screenWidth * 0.04, // Smaller font size
-                        color: Colors.black, // Black text
-                      ),
+                SizedBox(height: screenHeight * 0.03),
+                ElevatedButton(
+                  onPressed: _register,
+                  child: Text(
+                    'Register',
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.04,
+                      color: Colors.black,
                     ),
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(
-                          vertical: screenHeight * 0.015), // Smaller padding
-                      backgroundColor: Colors.white,
-                      minimumSize: Size(screenWidth * 0.7, screenHeight * 0.05), // Smaller size
-                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(
+                        vertical: screenHeight * 0.015),
+                    backgroundColor: Colors.white,
+                    minimumSize:
+                        Size(screenWidth * 0.7, screenHeight * 0.05),
                   ),
                 ),
               ],
@@ -233,6 +258,7 @@ class _StudentRegisterScreenState extends State<StudentRegisterScreen> {
     required TextEditingController controller,
     required String labelText,
     bool obscureText = false,
+    FormFieldValidator<String>? validator,
   }) {
     final double screenWidth = MediaQuery.of(context).size.width;
 
@@ -240,17 +266,18 @@ class _StudentRegisterScreenState extends State<StudentRegisterScreen> {
       controller: controller,
       decoration: InputDecoration(
         labelText: labelText,
-        border: OutlineInputBorder(),
+        border: const OutlineInputBorder(),
         contentPadding: EdgeInsets.symmetric(
             horizontal: screenWidth * 0.04, vertical: screenWidth * 0.03),
       ),
       obscureText: obscureText,
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter your $labelText';
-        }
-        return null;
-      },
+      validator: validator ??
+          (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter your $labelText';
+            }
+            return null;
+          },
     );
   }
 }
