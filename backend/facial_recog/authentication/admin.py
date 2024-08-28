@@ -4,10 +4,11 @@ from .models import Student, Teacher
 
 class StudentAdmin(BaseUserAdmin):
     list_display = ('student_id', 'email', 'first_name', 'last_name', 'batch', 'enrolled_year','is_active', 'is_staff', 'is_superuser')
-    list_filter = ('is_superuser', 'is_staff')
+    list_filter = ('is_superuser', 'is_staff','is_active')
     fieldsets = (
         ('User Credentials', {'fields': ('student_id', 'email', 'password')}),
-        ('Personal Info', {'fields': ('first_name', 'last_name', 'batch', 'enrolled_year', 'recognized_faces')}),
+        ('Personal Info', {'fields': ('first_name', 'last_name', 'batch', 'enrolled_year')}),
+        # , 'recognized_faces'
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser')}),
     )
     add_fieldsets = (
@@ -21,22 +22,23 @@ class StudentAdmin(BaseUserAdmin):
     filter_horizontal = ()
 
 class TeacherAdmin(BaseUserAdmin):
-    list_display = ('teacher_id', 'first_name', 'last_name','is_active', 'is_staff', 'is_superuser')
-    list_filter = ('is_superuser', 'is_staff')
+    list_display = ('teacher_id', 'first_name', 'last_name', 'email', 'is_active', 'is_staff', 'is_superuser')
+    list_filter = ('is_superuser', 'is_staff','is_active')
     fieldsets = (
         ('User Credentials', {'fields': ('teacher_id', 'password')}),
-        ('Personal Info', {'fields': ('first_name', 'last_name')}),
+        ('Personal Info', {'fields': ('first_name', 'last_name', 'email')}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser')}),
     )
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('teacher_id', 'first_name', 'last_name', 'password1', 'password2'),
+            'fields': ('teacher_id', 'first_name', 'last_name', 'email', 'password1', 'password2'),
         }),
     )
-    search_fields = ('teacher_id',)
+    search_fields = ('teacher_id', 'email')
     ordering = ('teacher_id',)
     filter_horizontal = ()
+
 
 # Register the models with the custom admin classes
 admin.site.register(Student, StudentAdmin)

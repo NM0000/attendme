@@ -1,8 +1,11 @@
 from rest_framework import serializers
-from django.utils.encoding import smart_str, force_bytes, DjangoUnicodeDecodeError
-from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from .models import Student, Teacher
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.utils.encoding import smart_str, force_bytes, DjangoUnicodeDecodeError
+from authentication.utils import Util
+
 
 # Student Registration Serializer
 class StudentRegistrationSerializer(serializers.ModelSerializer):
@@ -21,8 +24,16 @@ class StudentRegistrationSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        validated_data.pop('password2')
+        # validated_data.pop('password2')
         return Student.objects.create_user(**validated_data)
+
+# Student Login Serializer
+class StudentLoginSerializer(serializers.ModelSerializer):
+    student_id = serializers.CharField(max_length=50)
+
+    class Meta:
+        model = Student
+        fields = ['student_id', 'password']
 
 # Teacher Registration Serializer
 class TeacherRegistrationSerializer(serializers.ModelSerializer):
@@ -30,7 +41,7 @@ class TeacherRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Teacher
-        fields = ['teacher_id', 'first_name', 'last_name', 'password', 'password2']
+        fields = ['teacher_id', 'email', 'first_name', 'last_name', 'password', 'password2']
         extra_kwargs = {'password': {'write_only': True}}
 
     def validate(self, attrs):
@@ -44,14 +55,6 @@ class TeacherRegistrationSerializer(serializers.ModelSerializer):
         validated_data.pop('password2')
         return Teacher.objects.create_user(**validated_data)
 
-# Student Login Serializer
-class StudentLoginSerializer(serializers.ModelSerializer):
-    student_id = serializers.CharField(max_length=50)
-
-    class Meta:
-        model = Student
-        fields = ['student_id', 'password']
-
 # Teacher Login Serializer
 class TeacherLoginSerializer(serializers.ModelSerializer):
     teacher_id = serializers.CharField(max_length=50)
@@ -64,13 +67,14 @@ class TeacherLoginSerializer(serializers.ModelSerializer):
 class StudentProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
-        fields = ['student_id', 'email', 'first_name', 'last_name', 'batch', 'enrolled_year', 'recognized_faces']
+        fields = ['student_id', 'email', 'first_name', 'last_name', 'batch', 'enrolled_year']
 
 # Teacher Profile Serializer
 class TeacherProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Teacher
-        fields = ['teacher_id', 'first_name', 'last_name']
+        fields = ['teacher_id', 'email', 'first_name', 'last_name']
+
 
 # Change Password Serializer
 class UserChangePasswordSerializer(serializers.Serializer):
@@ -98,7 +102,7 @@ class SendPasswordResetEmailSerializer(serializers.Serializer):
         fields = ['email']
 
     def validate(self, attrs):
-        email = attrs.get('email')
+        email = attrs.get('email','')
         user = None
         if Student.objects.filter(email=email).exists():
             user = Student.objects.get(email=email)
@@ -108,11 +112,14 @@ class SendPasswordResetEmailSerializer(serializers.Serializer):
         if user:
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = PasswordResetTokenGenerator().make_token(user)
-            link = f'http://127.0.0.1:8000/:3000/api/user/reset/{uid}/{token}'
+            print('Encoded UID', uid)
+            link = 'http://localhost:3000/api/user/reset/'+uid+'/'+token
+            print('Password Reset Link', link)
             # Send email logic here (use your utility class if necessary)
             return attrs
         else:
             raise serializers.ValidationError('You are not a Registered User')
+        return super().validate(attrs)
 
 # Password Reset Serializer
 class UserPasswordResetSerializer(serializers.Serializer):
@@ -142,6 +149,7 @@ class UserPasswordResetSerializer(serializers.Serializer):
             user.save()
             return attrs
         except DjangoUnicodeDecodeError:
+            PasswordResetTokenGenerator().check_token(user, token)
             raise serializers.ValidationError('Token is not valid or expired')
 
 

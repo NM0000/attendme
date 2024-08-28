@@ -414,7 +414,6 @@
 // }
 
 //version 3
-
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -522,12 +521,12 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
   }
 
   Future<void> _sendImagesToBackend(String studentId, List<String> imagePaths) async {
-    final Uri url = Uri.parse('http://localhost:8000/attendance/upload_images/');
+    final Uri url = Uri.parse('http://192.168.1.5:8000/api/auth/upload_photo/');
     final request = http.MultipartRequest('POST', url);
 
     for (String path in imagePaths) {
       final File file = File(path);
-      request.files.add(await http.MultipartFile.fromPath('images', file.path));
+      request.files.add(await http.MultipartFile.fromPath('photo', file.path));
     }
 
     // Include student ID in the request
@@ -640,21 +639,8 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
                         ),
                         SizedBox(height: 20),
                         ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blueAccent,
-                            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
                           onPressed: _isCapturing ? null : _startCapturing,
-                          child: Text(
-                            'Start Capture',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          child: Text(_isCapturing ? 'Capturing...' : 'Start Capture'),
                         ),
                       ],
                     ),
@@ -662,8 +648,10 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
                 ],
               );
             } else {
-              return Center(child: Text('Failed to initialize the camera.'));
+              return Center(child: Text('Camera not initialized'));
             }
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
           } else {
             return Center(child: CircularProgressIndicator());
           }
