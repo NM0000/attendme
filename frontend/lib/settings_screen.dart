@@ -126,6 +126,8 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isMobile = MediaQuery.of(context).size.width < 600;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -133,18 +135,21 @@ class SettingsScreen extends StatelessWidget {
           style: TextStyle(
             fontSize: 25,
             fontWeight: FontWeight.bold,
+            color: Colors.white
           ),
         ),
-        backgroundColor: Colors.brown,
+        backgroundColor: Colors.brown[300], // Consistent with ChooseOptionScreen
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back,color: Colors.white, size: isMobile ? 32.0 : 40.0),
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
       ),
+      backgroundColor: Colors.brown[50], // Consistent with ChooseOptionScreen
       body: Center(
         child: SingleChildScrollView(
+          padding: EdgeInsets.all(isMobile ? 16.0 : 24.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -156,13 +161,15 @@ class SettingsScreen extends StatelessWidget {
                 icon: const Icon(Icons.lock, size: 30),
                 label: const Text('Change Password'),
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  textStyle: const TextStyle(fontSize: 18),
-                  backgroundColor: Colors.brown,
-                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(horizontal: isMobile ? 16.0 : 20.0, vertical: isMobile ? 12.0 : 16.0),
+                  textStyle: TextStyle(fontSize: isMobile ? 16.0 : 18.0),
+                  backgroundColor: Colors.teal[300], // Attractive color
+                  foregroundColor: Colors.white, // Text color
+                  elevation: 5,
+                  shadowColor: Colors.teal[300]?.withOpacity(0.5), // Subtle shadow effect
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: isMobile ? 20.0 : 24.0),
               ElevatedButton.icon(
                 onPressed: () {
                   Navigator.pushNamed(context, '/help_screen');
@@ -170,13 +177,15 @@ class SettingsScreen extends StatelessWidget {
                 icon: const Icon(Icons.help, size: 30),
                 label: const Text('Help'),
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  textStyle: const TextStyle(fontSize: 18),
-                  backgroundColor: Colors.brown,
-                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(horizontal: isMobile ? 16.0 : 20.0, vertical: isMobile ? 12.0 : 16.0),
+                  textStyle: TextStyle(fontSize: isMobile ? 16.0 : 18.0),
+                  backgroundColor: Colors.orange[300], // Attractive color
+                  foregroundColor: Colors.white, // Text color
+                  elevation: 5,
+                  shadowColor: Colors.orange[300]?.withOpacity(0.5), // Subtle shadow effect
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: isMobile ? 20.0 : 24.0),
               ElevatedButton.icon(
                 onPressed: () {
                   _showLogoutConfirmation(context);
@@ -184,10 +193,12 @@ class SettingsScreen extends StatelessWidget {
                 icon: const Icon(Icons.logout, size: 30),
                 label: const Text('Log Out'),
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  textStyle: const TextStyle(fontSize: 18),
-                  backgroundColor: Colors.brown,
-                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(horizontal: isMobile ? 16.0 : 20.0, vertical: isMobile ? 12.0 : 16.0),
+                  textStyle: TextStyle(fontSize: isMobile ? 16.0 : 18.0),
+                  backgroundColor: Colors.red[300], // Attractive color
+                  foregroundColor: Colors.white, // Text color
+                  elevation: 5,
+                  shadowColor: Colors.red[300]?.withOpacity(0.5), // Subtle shadow effect
                 ),
               ),
             ],

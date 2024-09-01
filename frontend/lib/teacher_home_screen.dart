@@ -1,4 +1,3 @@
-//changes done
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -66,12 +65,12 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.brown[400],
+        backgroundColor: Colors.brown[300],
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             CircleAvatar(
-              backgroundColor: Colors.grey[400],
+              backgroundColor: Colors.grey[200],
               radius: screenWidth * 0.06, // Responsive avatar size
               child: Icon(Icons.person, size: screenWidth * 0.06),
             ),
@@ -101,6 +100,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                     style: TextStyle(
                       fontSize: screenWidth * 0.06, // Responsive font size
                       fontWeight: FontWeight.bold,
+                      color: Colors.black, // Text color
                     ),
                   ),
                   Text(
@@ -108,6 +108,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                     style: TextStyle(
                       fontSize: screenWidth * 0.06, // Responsive font size
                       fontWeight: FontWeight.bold,
+                      color: Colors.black, // Text color
                     ),
                   ),
                   SizedBox(height: screenHeight * 0.01), // Responsive spacing
@@ -115,12 +116,14 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                     currentDate,
                     style: TextStyle(
                       fontSize: screenWidth * 0.04, // Responsive font size
+                      color: Colors.black, // Text color
                     ),
                   ),
                 ],
               ),
               SizedBox(height: screenHeight * 0.02), // Responsive spacing
 
+              // Quick Access Section
               Column(
                 children: [
                   _buildQuickAccessItem(
@@ -198,7 +201,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
             borderRadius: BorderRadius.circular(screenWidth * 0.04), // Responsive border radius
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.5),
+                color: Colors.grey.withOpacity(1),
                 spreadRadius: 2,
                 blurRadius: 5,
                 offset: const Offset(0, 3),
@@ -215,6 +218,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                     style: TextStyle(
                       fontSize: screenWidth * 0.05, // Responsive font size
                       fontWeight: FontWeight.bold,
+                      color: Colors.black, // Text color
                     ),
                   ),
                 ),
@@ -267,6 +271,17 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
             final dateStr = DateFormat.yMd().format(day);
             return _reminders[dateStr] ?? [];
           },
+          headerStyle: HeaderStyle(
+            formatButtonVisible: false,
+            titleCentered: true,
+            titleTextStyle: TextStyle(
+              fontSize: screenWidth * 0.05, // Responsive font size
+              fontWeight: FontWeight.bold,
+              color: Colors.black, // Text color
+            ),
+            leftChevronIcon: Icon(Icons.chevron_left, size: screenWidth * 0.06),
+            rightChevronIcon: Icon(Icons.chevron_right, size: screenWidth * 0.06),
+          ),
           calendarStyle: CalendarStyle(
             todayDecoration: BoxDecoration(
               color: Colors.blueAccent,
@@ -280,11 +295,19 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
               color: Colors.orange,
               shape: BoxShape.circle,
             ),
+            defaultTextStyle: TextStyle(
+              fontSize: screenWidth * 0.04, // Responsive font size
+              color: Colors.black, // Text color
+            ),
+            weekendTextStyle: TextStyle(
+              fontSize: screenWidth * 0.04, // Responsive font
+            
           ),
         ),
       ),
-    );
-  }
+    ),  
+  );
+}
 
   void _showRemindersDialog(DateTime selectedDay) {
     final dateStr = DateFormat.yMd().format(selectedDay);
@@ -296,11 +319,11 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return AlertDialog(
-              title: Text(DateFormat.yMMMMd().format(selectedDay)),
+              title: Text(DateFormat.yMMMMd().format(selectedDay), style: TextStyle(color: Colors.black)),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: remindersForDay.isEmpty
-                    ? [const Text('No reminders for this day.')]
+                    ? [const Text('No reminders for this day.', style: TextStyle(color: Colors.black))]
                     : remindersForDay
                         .asMap()
                         .entries
@@ -308,8 +331,8 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                           final index = entry.key;
                           final reminder = entry.value;
                           return ListTile(
-                            title: Text(reminder),
-                                                        trailing: IconButton(
+                            title: Text(reminder, style: TextStyle(color: Colors.black)),
+                            trailing: IconButton(
                               icon: const Icon(Icons.delete, color: Colors.red),
                               onPressed: () async {
                                 // Remove the reminder
@@ -336,7 +359,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Close'),
+                  child: const Text('Close', style: TextStyle(color: Colors.black)),
                 ),
               ],
             );
@@ -345,17 +368,23 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       },
     );
   }
-
-  void _showMenu(BuildContext context, double screenWidth) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Column(
+void _showMenu(BuildContext context, double screenWidth) {
+  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext context) {
+      return SafeArea(
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: Icon(Icons.add, size: screenWidth * 0.07),
-              title: Text('Add Reminder', style: TextStyle(fontSize: screenWidth * 0.05)),
+              leading: Icon(Icons.add, size: screenWidth * 0.07, color: Colors.black),
+              title: Text(
+                'Add Reminder',
+                style: TextStyle(
+                  fontSize: screenWidth * 0.045, // Smaller text size
+                  color: Colors.black,
+                ),
+              ),
               onTap: () {
                 Navigator.push(
                   context,
@@ -370,8 +399,14 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.settings, size: screenWidth * 0.07),
-              title: Text('Settings', style: TextStyle(fontSize: screenWidth * 0.05)),
+              leading: Icon(Icons.settings, size: screenWidth * 0.07, color: Colors.black),
+              title: Text(
+                'Settings',
+                style: TextStyle(
+                  fontSize: screenWidth * 0.045, // Smaller text size
+                  color: Colors.black,
+                ),
+              ),
               onTap: () {
                 Navigator.push(
                   context,
@@ -380,11 +415,10 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
               },
             ),
           ],
-        );
-      },
-    );
-  }
-
+        ),
+      );
+    },
+  );
+}
   final ScrollController _scrollController = ScrollController();
 }
-

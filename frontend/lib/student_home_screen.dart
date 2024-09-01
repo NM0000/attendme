@@ -68,7 +68,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.brown,
+        backgroundColor: Colors.brown[300],
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -89,7 +89,8 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
       body: SingleChildScrollView(
         controller: _scrollController,
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05, vertical: screenHeight * 0.02),
+          padding: EdgeInsets.symmetric(
+              horizontal: screenWidth * 0.05, vertical: screenHeight * 0.02),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -116,7 +117,6 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                 ],
               ),
               SizedBox(height: screenHeight * 0.02),
-
               // Calendar Section
               Container(
                 decoration: BoxDecoration(
@@ -124,7 +124,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                   borderRadius: BorderRadius.circular(8.0),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
+                      color: Colors.grey.withOpacity(0.3),
                       spreadRadius: 1,
                       blurRadius: 7,
                       offset: const Offset(0, 3),
@@ -147,26 +147,50 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                     final dateStr = DateFormat.yMd().format(day);
                     return _reminders[dateStr] ?? [];
                   },
+                  headerStyle: HeaderStyle(
+                    formatButtonVisible: false,
+                    titleCentered: true,
+                    leftChevronIcon:
+                        Icon(Icons.chevron_left, color: Colors.brown[600]),
+                    rightChevronIcon:
+                        Icon(Icons.chevron_right, color: Colors.brown[600]),
+                    titleTextStyle: TextStyle(
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.brown[600],
+                    ),
+                  ),
                   calendarStyle: CalendarStyle(
                     todayDecoration: BoxDecoration(
-                      border: Border.all(color: Colors.blue, width: 2),
+                      border: Border.all(color: Colors.teal[300]!, width: 1.5),
                       shape: BoxShape.circle,
                     ),
                     selectedDecoration: BoxDecoration(
-                      color: Colors.blue,
+                      color: Colors.teal[300]!,
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.blue, width: 2), // Outer ring
-                    ),
-                    selectedTextStyle: TextStyle(
-                      color: Colors.transparent, // Inner part transparent
                     ),
                     defaultDecoration: BoxDecoration(
-                      color: Colors.transparent,
                       shape: BoxShape.circle,
                     ),
                     weekendDecoration: BoxDecoration(
-                      color: Colors.transparent,
                       shape: BoxShape.circle,
+                    ),
+                    outsideDecoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                    ),
+                    selectedTextStyle: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    todayTextStyle: TextStyle(
+                      color: Colors.teal[300]!,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    defaultTextStyle: TextStyle(
+                      color: Colors.brown[600],
+                    ),
+                    weekendTextStyle: TextStyle(
+                      color: Colors.brown[600],
                     ),
                   ),
                 ),
@@ -182,12 +206,21 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                 ),
               ),
               SizedBox(height: screenHeight * 0.01),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              GridView.count(
+                crossAxisCount: 2,
+                crossAxisSpacing: 16.0,
+                mainAxisSpacing: 16.0,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
                 children: [
-                  _buildQuickAccessItem(context, 'Events', Icons.event, '/events_screen'),
-                  _buildQuickAccessItem(context, 'Leave Note', Icons.note_add, '/leave_note_screen'),
-                  _buildQuickAccessItem(context, 'Attendance Report', Icons.receipt, '/student_attendance_report_screen'),
+                  _buildQuickAccessItem(
+                      context, 'Events', Icons.event, const Color.fromARGB(255, 77, 182, 172), '/events_screen'),
+                  _buildQuickAccessItem(
+                      context, 'Leave Note', Icons.note_add, const Color.fromARGB(255, 247, 179, 77), '/leave_note_screen'),
+                  _buildQuickAccessItem(
+                      context, 'Attendance Report', Icons.receipt, const Color.fromARGB(255, 105, 184, 248), '/student_attendance_report_screen'),
+                  _buildQuickAccessItem(
+                      context, 'Settings', Icons.settings, const Color.fromARGB(255, 236, 101, 146), '/settings_screen'),
                 ],
               ),
               SizedBox(height: screenHeight * 0.02),
@@ -213,7 +246,8 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
               ),
               SizedBox(height: screenHeight * 0.01),
               ...attendanceProvider.attendanceData.entries.take(5).map((entry) {
-                return _buildAttendanceHistoryItem(entry.key, entry.value ? 'Present' : 'Absent', 'Subject: Example');
+                return _buildAttendanceHistoryItem(entry.key,
+                    entry.value ? 'Present' : 'Absent', 'Subject: Example');
               }).toList(),
             ],
           ),
@@ -256,7 +290,8 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
     );
   }
 
-  Widget _buildQuickAccessItem(BuildContext context, String title, IconData icon, String routeName) {
+  Widget _buildQuickAccessItem(
+      BuildContext context, String title, IconData icon, Color color, String routeName) {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return GestureDetector(
@@ -264,22 +299,39 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
         Navigator.pushNamed(context, routeName);
       },
       child: Container(
-        width: screenWidth * 0.25, // Adjust width based on screen size
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(12.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.3),
+              spreadRadius: 2,
+              blurRadius: 6,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Stack(
+          alignment: Alignment.center,
           children: [
-            Icon(icon, color: Colors.brown, size: screenWidth * 0.1), // Adjust icon size
-            SizedBox(height: 4),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: screenWidth * 0.04,
-                overflow: TextOverflow.ellipsis,
+            Positioned(
+              top: screenWidth * 0.1,
+              child: Icon(
+                icon,
+                size: screenWidth * 0.1,
+                color: Colors.white,
               ),
-              maxLines: 2,
-              softWrap: true,
+            ),
+            Positioned(
+              bottom: screenWidth * 0.1,
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: screenWidth * 0.04,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         ),
@@ -287,7 +339,8 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
     );
   }
 
-  Widget _buildAttendanceHistoryItem(String date, String title, String subtitle) {
+  Widget _buildAttendanceHistoryItem(
+      String date, String title, String subtitle) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8.0),
       padding: const EdgeInsets.all(8.0),
@@ -296,11 +349,10 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
         borderRadius: BorderRadius.circular(8.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
+            color: Colors.grey.withOpacity(0.3),
             spreadRadius: 1,
             blurRadius: 7,
             offset: const Offset(0, 3),
-         
           ),
         ],
       ),
@@ -320,12 +372,15 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Reminders for ${DateFormat.yMMMd().format(selectedDay)}'),
+          title:
+              Text('Reminders for ${DateFormat.yMMMd().format(selectedDay)}'),
           content: remindersForDay.isEmpty
               ? const Text('No reminders for this day.')
               : Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: remindersForDay.map((reminder) => Text(reminder)).toList(),
+                  children: remindersForDay
+                      .map((reminder) => Text(reminder))
+                      .toList(),
                 ),
           actions: [
             TextButton(
@@ -348,8 +403,10 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
             child: Column(
               children: [
                 ...Provider.of<AttendanceProvider>(context)
-                    .attendanceData.entries
-                    .map((entry) => _buildAttendanceHistoryItem(entry.key, entry.value ? 'Present' : 'Absent', 'Subject: Example'))
+                    .attendanceData
+                    .entries
+                    .map((entry) => _buildAttendanceHistoryItem(entry.key,
+                        entry.value ? 'Present' : 'Absent', 'Subject: Example'))
                     .toList(),
               ],
             ),

@@ -17,7 +17,7 @@ class _StudentListPageState extends State<StudentListPage> {
   }
 
   Future<void> _fetchStudents() async {
-    final response = await http.get(Uri.parse('http://127.0.0.1:8000/api/students/'));//change gar hai chaiyema
+    final response = await http.get(Uri.parse('http://127.0.0.1:8000/api/students/'));
 
     if (response.statusCode == 200) {
       setState(() {
@@ -33,7 +33,20 @@ class _StudentListPageState extends State<StudentListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Student List'),
+        backgroundColor: Colors.brown[300],
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Student List',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 25,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: students.isEmpty
           ? Center(child: CircularProgressIndicator())
