@@ -13,11 +13,12 @@ class HelpScreen extends StatelessWidget {
           style: TextStyle(
             fontSize: 25,
             fontWeight: FontWeight.bold,
+            color: Colors.white
           ),
         ),
-        backgroundColor: Colors.brown,
+        backgroundColor: Colors.brown[300],
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: Colors.white,),
           onPressed: () {
             Navigator.of(context).pop();
           },

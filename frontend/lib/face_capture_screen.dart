@@ -1,12 +1,9 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:camera/camera.dart';
-import 'package:http/http.dart' as http;
-import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
-import 'package:image/image.dart' as img;
 import 'package:google_ml_kit/google_ml_kit.dart';
+import 'package:image/image.dart' as img;
+import 'package:camera/camera.dart';
 
 class FaceCaptureScreen extends StatefulWidget {
   final String studentId;
@@ -19,136 +16,90 @@ class FaceCaptureScreen extends StatefulWidget {
 
 class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
   CameraController? _cameraController;
-  Future<void>? _initializeControllerFuture;
-  List<XFile>? _imageFiles = [];
-  int _capturedImagesCount = 0;
+  late Future<void> _initializeControllerFuture;
   final FaceDetector _faceDetector = GoogleMlKit.vision.faceDetector(
     FaceDetectorOptions(
       enableContours: true,
       enableLandmarks: true,
       enableClassification: true,
+      mode: FaceDetectorMode.accurate,
     ),
   );
+  List<String> _capturedImagePaths = [];
+  bool _isDetecting = false;
 
   @override
   void initState() {
     super.initState();
-    _initializeControllerFuture = _initializeCamera();
+    _initializeCamera();
   }
 
   Future<void> _initializeCamera() async {
-    try {
-      final cameras = await availableCameras();
-      final frontCamera = cameras.firstWhere(
-        (camera) => camera.lensDirection == CameraLensDirection.front,
-        orElse: () => cameras.first,
-      );
-
-      _cameraController = CameraController(
-        frontCamera,
-        ResolutionPreset.high,
-      );
-
-      await _cameraController!.initialize();
-      setState(() {}); // Refresh the UI to reflect the camera initialization
-    } catch (e) {
-      print('Error initializing camera: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Camera initialization failed: $e')),
-      );
-    }
+    final cameras = await availableCameras();
+    final firstCamera = cameras.first;
+    _cameraController = CameraController(
+      firstCamera,
+      ResolutionPreset.high,
+    );
+    _initializeControllerFuture = _cameraController!.initialize().then((_) {
+      setState(() {});
+      _startImageStream();
+    });
   }
 
-  Future<void> _captureImage() async {
-    if (_cameraController == null || !_cameraController!.value.isInitialized) {
-      print('Camera is not initialized.');
-      return;
-    }
+  void _startImageStream() {
+    _cameraController?.startImageStream((CameraImage cameraImage) async {
+      if (_isDetecting) return;
+      _isDetecting = true;
 
-    try {
-      final image = await _cameraController!.takePicture();
-      final imageFile = File(image.path);
+      // Convert the camera image to a format compatible with the ML Kit
+      final bytes = cameraImage.planes.fold<Uint8List>(
+        Uint8List(0),
+        (buffer, plane) => Uint8List.fromList(buffer + plane.bytes),
+      );
 
-      // Load image and get its dimensions
-      final imageBytes = await imageFile.readAsBytes();
-      final imageImage = img.decodeImage(Uint8List.fromList(imageBytes))!;
-      final width = imageImage.width.toDouble();
-      final height = imageImage.height.toDouble();
-
-      final imageInput = InputImage.fromBytes(
-        bytes: Uint8List.fromList(imageBytes),
+      final image = InputImage.fromBytes(
+        bytes: bytes,
         inputImageData: InputImageData(
-          size: Size(width, height),
+          size: Size(cameraImage.width.toDouble(), cameraImage.height.toDouble()),
           imageRotation: InputImageRotation.Rotation_0deg,
           inputImageFormat: InputImageFormat.NV21,
-          planeData: [],
+          planeData: cameraImage.planes.map(
+            (plane) {
+              return InputImagePlaneMetadata(
+                bytesPerRow: plane.bytesPerRow,
+                height: cameraImage.height,
+                width: cameraImage.width,
+              );
+            },
+          ).toList(),
         ),
       );
 
-      // Detect faces in the image
-      final faces = await _faceDetector.processImage(imageInput);
-
+      final faces = await _faceDetector.processImage(image);
       if (faces.isNotEmpty) {
-        // If faces are detected, process the image
-        setState(() {
-          _imageFiles?.add(image);
-          _capturedImagesCount++;
-        });
-      } else {
-        print('No faces detected in the image.');
+        // If a face is detected, capture the image
+        _captureImage();
+      }
+
+      _isDetecting = false;
+    });
+  }
+
+  Future<void> _captureImage() async {
+    try {
+      final image = await _cameraController!.takePicture();
+      _capturedImagePaths.add(image.path);
+      setState(() {});
+
+      // If you want to stop the stream after capturing enough images
+      if (_capturedImagePaths.length >= 5) { // Adjust the count as needed
+        _cameraController?.stopImageStream();
+        Navigator.pop(context, _capturedImagePaths);
       }
     } catch (e) {
       print('Error capturing image: $e');
     }
-  }
-
-  Future<void> _uploadImages() async {
-    if (_imageFiles != null && _imageFiles!.isNotEmpty) {
-      final studentDir = await _getStudentDirectory();
-
-      for (var imageFile in _imageFiles!) {
-        final fileName = path.basename(imageFile.path);
-        final localFile = File(imageFile.path);
-        final request = http.MultipartRequest(
-          'POST',
-          Uri.parse('http://your-backend-url/upload'), // Update with your backend URL
-        );
-
-        request.files.add(
-          http.MultipartFile.fromBytes(
-            'image',
-            localFile.readAsBytesSync(),
-            filename: fileName,
-          ),
-        );
-
-        request.fields['studentId'] = widget.studentId;
-        request.fields['directory'] = studentDir;
-
-        try {
-          final response = await request.send();
-          if (response.statusCode == 200) {
-            print('Image uploaded successfully.');
-          } else {
-            print('Failed to upload image.');
-          }
-        } catch (e) {
-          print('Error uploading image: $e');
-        }
-      }
-    }
-  }
-
-  Future<String> _getStudentDirectory() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final studentDir = path.join(directory.path, widget.studentId);
-    final dir = Directory(studentDir);
-
-    if (!await dir.exists()) {
-      await dir.create();
-    }
-
-    return studentDir;
   }
 
   @override
@@ -168,65 +119,31 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Face Capture'),
+        backgroundColor: const Color.fromARGB(255, 167, 131, 118),
       ),
-      body: FutureBuilder<void>(
-        future: _initializeControllerFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!_cameraController!.value.isInitialized) {
-            return Center(child: Text('Failed to initialize the camera.'));
-          }
-
-          return Column(
-            children: [
-              // Camera preview
-              Container(
-                width: screenWidth,
-                height: screenHeight * 0.6, // 60% of screen height
-                child: CameraPreview(_cameraController!),
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            flex: 3,
+            child: Container(
+              padding: EdgeInsets.all(8.0),
+              child: _cameraController == null || !_cameraController!.value.isInitialized
+                  ? Center(child: CircularProgressIndicator())
+                  : CameraPreview(_cameraController!),
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: Container(
+              alignment: Alignment.center,
+              padding: EdgeInsets.all(8.0),
+              child: Text(
+                'Captured Images: ${_capturedImagePaths.length}',
+                style: TextStyle(fontSize: 18),
               ),
-              // Controls and status
-              Container(
-                width: screenWidth,
-                height: screenHeight * 0.4, // Remaining height for controls
-                padding: EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      onPressed: _captureImage,
-                      child: Text('Capture Image'),
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: Size(screenWidth * 0.8, 50),
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
-                      ),
-                    ),
-                    SizedBox(height: 16.0),
-                    ElevatedButton(
-                      onPressed: _uploadImages,
-                      child: Text('Upload Images'),
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: Size(screenWidth * 0.8, 50),
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
-                      ),
-                    ),
-                    SizedBox(height: 16.0),
-                    Text(
-                      'Captured Images: $_capturedImagesCount',
-                      style: TextStyle(fontSize: 16.0),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          );
-        },
+            ),
+          ),
+        ],
       ),
     );
   }

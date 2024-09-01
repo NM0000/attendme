@@ -21,8 +21,7 @@ class _StudentRegisterScreenState extends State<StudentRegisterScreen> {
   final TextEditingController _studentIdController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
   final TextEditingController _otpController = TextEditingController();
   List<String> _capturedImagePaths = [];
 
@@ -253,14 +252,9 @@ class _StudentRegisterScreenState extends State<StudentRegisterScreen> {
                           ),
                         ),
                         style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(
-                              vertical: isMobile ? 12.0 : 16.0),
+                          padding: EdgeInsets.symmetric(vertical: isMobile ? 12.0 : 16.0),
                           backgroundColor: Colors.white,
-                          minimumSize: Size(
-                              isMobile ? screenWidth * 0.8 : screenWidth * 0.7,
-                              isMobile
-                                  ? screenHeight * 0.05
-                                  : screenHeight * 0.07),
+                          minimumSize: Size(isMobile ? screenWidth * 0.8 : screenWidth * 0.7, isMobile ? screenHeight * 0.05 : screenHeight * 0.07),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12.0),
                           ),
@@ -281,14 +275,9 @@ class _StudentRegisterScreenState extends State<StudentRegisterScreen> {
                           ),
                         ),
                         style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(
-                              vertical: isMobile ? 12.0 : 16.0),
+                          padding: EdgeInsets.symmetric(vertical: isMobile ? 12.0 : 16.0),
                           backgroundColor: Colors.white,
-                          minimumSize: Size(
-                              isMobile ? screenWidth * 0.8 : screenWidth * 0.7,
-                              isMobile
-                                  ? screenHeight * 0.05
-                                  : screenHeight * 0.07),
+                          minimumSize: Size(isMobile ? screenWidth * 0.8 : screenWidth * 0.7, isMobile ? screenHeight * 0.05 : screenHeight * 0.07),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12.0),
                           ),
