@@ -24,7 +24,7 @@ class _TeacherRegisterScreenState extends State<TeacherRegisterScreen> {
   Future<void> _register() async {
     if (_formKey.currentState!.validate()) {
       final response = await http.post(
-        Uri.parse('http://127.0.0.1:8000/api/teachers/register/'),
+        Uri.parse('http://192.168.1.5:8000/api/auth/teachers/register/'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -74,7 +74,7 @@ class _TeacherRegisterScreenState extends State<TeacherRegisterScreen> {
 
   Future<void> _verifyOtp() async {
     final response = await http.post(
-      Uri.parse('http://127.0.0.1:8000/api/teachers/verify_otp/'),
+      Uri.parse('http://192.168.1.5:8000/api/auth/teacher/register/'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

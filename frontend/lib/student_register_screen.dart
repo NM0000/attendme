@@ -44,7 +44,7 @@ class _StudentRegisterScreenState extends State<StudentRegisterScreen> {
     if (_formKey.currentState!.validate() && _capturedImagePaths.isNotEmpty) {
       final request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://127.0.0.1:8000/api/accounts/register/'),
+        Uri.parse('http://192.168.1.5:8000/api/auth/student/register/'),
       );
 
       request.fields['studentId'] = _studentIdController.text;

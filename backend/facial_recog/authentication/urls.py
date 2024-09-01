@@ -8,7 +8,8 @@ from .views import (
     TeacherProfileView,
     UserChangePasswordView,
     SendPasswordResetEmailView,
-    UserPasswordResetView
+    UserPasswordResetView,
+    upload_photo
 )
 
 urlpatterns = [
@@ -16,6 +17,7 @@ urlpatterns = [
     path('student/register/', StudentRegistrationView.as_view(), name='student-register'),
     path('student/login/', StudentLoginView.as_view(), name='student-login'),
     path('student/profile/', StudentProfileView.as_view(), name='student-profile'),
+    path('upload_photo/', upload_photo, name='upload_photo'),
 
     # Teacher URLs
     path('teacher/register/', TeacherRegistrationView.as_view(), name='teacher-register'),
@@ -29,13 +31,4 @@ urlpatterns = [
 ]
 
 
-
-# from django.urls import path
-# from .views import StudentRegisterView, TeacherRegisterView, LoginView
-
-# urlpatterns = [
-#     path('admin/', admin.site.urls),
-#     path('student/register/', StudentRegisterView.as_view(), name='student-register'),
-#     path('teacher/register/', TeacherRegisterView.as_view(), name='teacher-register'),
-#     path('login/', LoginView.as_view(), name='login'),
-# ]
+ 
