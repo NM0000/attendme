@@ -1,45 +1,23 @@
 from django.contrib import admin
+from authentication.models import User
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import Student, Teacher
 
-class StudentAdmin(BaseUserAdmin):
-    list_display = ('student_id', 'email', 'first_name', 'last_name', 'batch', 'enrolled_year','is_active', 'is_staff', 'is_superuser')
-    list_filter = ('is_superuser', 'is_staff','is_active')
+class UserModelAdmin(BaseUserAdmin):
+    list_display = ('id', 'email', 'first_name', 'last_name', 'teacher_id', 'student_id', 'is_staff', 'is_admin')
+    list_filter = ('is_admin', 'is_staff')
     fieldsets = (
-        ('User Credentials', {'fields': ('student_id', 'email', 'password')}),
-        ('Personal Info', {'fields': ('first_name', 'last_name', 'batch', 'enrolled_year')}),
-        # , 'recognized_faces'
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser')}),
+        ('User Credentials', {'fields': ('email', 'password')}),
+        ('Personal info', {'fields': ('first_name', 'last_name', 'teacher_id', 'student_id', 'batch', 'enrolled_year')}),
+        ('Permissions', {'fields': ('is_admin', 'is_staff')}),
     )
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('student_id', 'email', 'first_name', 'last_name', 'batch', 'enrolled_year', 'password1', 'password2'),
+            'fields': ('email', 'first_name', 'last_name', 'teacher_id', 'student_id', 'password1', 'password2'),
         }),
     )
-    search_fields = ('student_id', 'email')
-    ordering = ('student_id', 'email')
-    filter_horizontal = ()
+    search_fields = ('email', 'teacher_id', 'student_id')
+    ordering = ('email', 'id')
+    filter_horizontal = []  # Override to avoid reference to non-existent fields
 
-class TeacherAdmin(BaseUserAdmin):
-    list_display = ('teacher_id', 'first_name', 'last_name', 'email', 'is_active', 'is_staff', 'is_superuser')
-    list_filter = ('is_superuser', 'is_staff','is_active')
-    fieldsets = (
-        ('User Credentials', {'fields': ('teacher_id', 'password')}),
-        ('Personal Info', {'fields': ('first_name', 'last_name', 'email')}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser')}),
-    )
-    add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('teacher_id', 'first_name', 'last_name', 'email', 'password1', 'password2'),
-        }),
-    )
-    search_fields = ('teacher_id', 'email')
-    ordering = ('teacher_id',)
-    filter_horizontal = ()
-
-
-# Register the models with the custom admin classes
-admin.site.register(Student, StudentAdmin)
-admin.site.register(Teacher, TeacherAdmin)
+admin.site.register(User, UserModelAdmin)
