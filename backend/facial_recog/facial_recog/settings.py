@@ -15,7 +15,7 @@ SECRET_KEY = 'django-insecure-8ip90bupgks__&kq2*=0hz-w+=31sm&7_=s%wt-v2zk)_r%=_t
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
     
-ALLOWED_HOSTS = [ '127.0.0.1', '192.168.1.2']
+ALLOWED_HOSTS = [ '127.0.0.1', '192.168.1.5, 10.0.2.2']
 
 
 # Application definition
@@ -165,5 +165,4 @@ PASSWORD_RESET_TIMEOUT=900          # 900 Sec = 15 Min
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "http://192.168.1.2:8000",
 ]
