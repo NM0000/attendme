@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from .models import User, Image
+from .models import User 
+# Image
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.utils.encoding import force_bytes, smart_str, DjangoUnicodeDecodeError
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
@@ -175,16 +176,7 @@ class UserPasswordResetSerializer(serializers.Serializer):
         except DjangoUnicodeDecodeError:
             raise serializers.ValidationError('Token is not valid or expired')
 
-
-# Student Serializer
-class StudentSerializer(serializers.ModelSerializer):
+class StudentImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['student_id', 'first_name', 'last_name', 'email', 'password', 'batch', 'enrolled_year']
-
-
-# Image Serializer
-class ImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Image
-        fields = ['student', 'image']
+        fields = ['student_id', 'profile_image']

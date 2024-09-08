@@ -4,14 +4,13 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
 from django.shortcuts import get_object_or_404
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import User, Image
+from .models import User 
+# StudentImage
 from .serializers import (
     TeacherRegistrationSerializer,
     StudentRegistrationSerializer,
@@ -22,7 +21,7 @@ from .serializers import (
     SendPasswordResetEmailSerializer,
     UserPasswordResetSerializer,
     UserChangePasswordSerializer,
-    ImageSerializer,
+    StudentImageSerializer
 )
 from .renderers import UserRenderer
 from django.contrib.auth import authenticate
@@ -116,37 +115,23 @@ class UserPasswordResetView(APIView):
         serializer = UserPasswordResetSerializer(data=request.data, context={'uid': uid, 'token': token})
         serializer.is_valid(raise_exception=True)
         return Response({'msg': 'Password reset successfully.'}, status=status.HTTP_200_OK)
+class UploadPhotoView(APIView):
 
-# Photo Upload and Model Update
-@csrf_exempt
-def upload_photo(request):
-    if request.method == 'POST':
-        student_id = request.POST.get('student_id')
+    def post(self, request, *args, **kwargs):
+        student_id = request.data.get('student_id')
         photo = request.FILES.get('photo')
+
         if not student_id or not photo:
-            return JsonResponse({'error': 'Missing student_id or photo'}, status=400)
+            return Response({'error': 'Missing student_id or photo'}, status=status.HTTP_400_BAD_REQUEST)
 
         student = get_object_or_404(User, student_id=student_id)
-        if not student:
-            return JsonResponse({'error': 'Invalid student_id'}, status=400)
 
-        # Create a directory for the student if it doesn't exist
-        student_dir = os.path.join('media', 'photos', student_id)
-        if not os.path.exists(student_dir):
-            os.makedirs(student_dir)
-
-        # Save the photo
-        file_path = os.path.join(student_dir, photo.name)
-        with default_storage.open(file_path, 'wb+') as destination:
-            for chunk in photo.chunks():
-                destination.write(chunk)
-
-        # Update the Image model
-        Image.objects.create(student=student, image=file_path)
-
-        return JsonResponse({'message': 'Photo uploaded successfully'})
-    return JsonResponse({'error': 'Invalid method'}, status=405)
-
+        serializer = StudentImageSerializer(instance=student, data={'profile_image': photo}, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'Photo uploaded successfully'}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
 # Payload Reception View
 @csrf_exempt
 def receive_payload(request):

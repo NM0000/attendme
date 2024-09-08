@@ -24,7 +24,7 @@ class _TeacherRegisterScreenState extends State<TeacherRegisterScreen> {
   Future<void> _register() async {
     if (_formKey.currentState!.validate()) {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:8000/api/auth/teachers/register/'),
+        Uri.parse('http://10.0.2.2:3000/api/auth/teachers/register/'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

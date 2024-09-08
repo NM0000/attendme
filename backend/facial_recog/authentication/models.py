@@ -36,6 +36,7 @@ class User(AbstractBaseUser):
     student_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
     batch = models.CharField(max_length=50, null=True, blank=True)
     enrolled_year = models.IntegerField(null=True, blank=True)
+    profile_image = models.ImageField(upload_to='photos/', null=True, blank=True)
 
     objects = UserManager()
 
@@ -50,7 +51,8 @@ class User(AbstractBaseUser):
 
     def has_module_perms(self, app_label):
         return True
-        
-class Image(models.Model):
-    student = models.ForeignKey(User, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='students/%Y/%m/%d/')
+
+# class StudentImage(models.Model):
+#     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='images')
+#     image = models.ImageField(upload_to='student_images/')  # Change upload path as needed
+#     uploaded_at = models.DateTimeField(auto_now_add=True)

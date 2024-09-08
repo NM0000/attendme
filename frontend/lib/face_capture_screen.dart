@@ -8,7 +8,7 @@ import 'package:camera/camera.dart';
 class FaceCaptureScreen extends StatefulWidget {
   final String studentId;
 
-  FaceCaptureScreen({required this.studentId});
+  const FaceCaptureScreen({Key? key, required this.studentId}) : super(key: key);
 
   @override
   _FaceCaptureScreenState createState() => _FaceCaptureScreenState();
@@ -27,6 +27,7 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
   );
   List<String> _capturedImagePaths = [];
   bool _isDetecting = false;
+  bool _isPreviewVisible = false; // To control visibility of preview
 
   @override
   void initState() {
@@ -95,7 +96,9 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
       // If you want to stop the stream after capturing enough images
       if (_capturedImagePaths.length >= 5) { // Adjust the count as needed
         _cameraController?.stopImageStream();
-        Navigator.pop(context, _capturedImagePaths);
+        setState(() {
+          _isPreviewVisible = true; // Show preview after capturing images
+        });
       }
     } catch (e) {
       print('Error capturing image: $e');
@@ -111,11 +114,6 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Use MediaQuery to get the available dimensions
-    final screenSize = MediaQuery.of(context).size;
-    final screenWidth = screenSize.width;
-    final screenHeight = screenSize.height;
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Face Capture'),
@@ -132,17 +130,52 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
                   : CameraPreview(_cameraController!),
             ),
           ),
-          Expanded(
-            flex: 1,
-            child: Container(
-              alignment: Alignment.center,
-              padding: EdgeInsets.all(8.0),
-              child: Text(
-                'Captured Images: ${_capturedImagePaths.length}',
-                style: TextStyle(fontSize: 18),
+          if (_isPreviewVisible) // Show preview if images are captured
+            Expanded(
+              flex: 1,
+              child: Container(
+                padding: EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: _capturedImagePaths.length,
+                        itemBuilder: (context, index) {
+                          final imagePath = _capturedImagePaths[index];
+                          return Container(
+                            margin: EdgeInsets.symmetric(vertical: 5.0),
+                            child: Image.file(
+                              File(imagePath),
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: 100,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context, _capturedImagePaths);
+                      },
+                      child: Text('Confirm'),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
+          if (!_isPreviewVisible) // Remove photo count if preview is visible
+            Expanded(
+              flex: 1,
+              child: Container(
+                alignment: Alignment.center,
+                padding: EdgeInsets.all(8.0),
+                child: Text(
+                  'Captured Images: ${_capturedImagePaths.length}',
+                  style: TextStyle(fontSize: 18),
+                ),
+              ),
+            ),
         ],
       ),
     );

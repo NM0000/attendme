@@ -9,7 +9,7 @@ from .views import (
     UserChangePasswordView,
     SendPasswordResetEmailView,
     UserPasswordResetView,
-    upload_photo
+    UploadPhotoView
 )
 
 urlpatterns = [
@@ -17,7 +17,7 @@ urlpatterns = [
     path('student/register/', StudentRegistrationView.as_view(), name='student-register'),
     path('student/login/', StudentLoginView.as_view(), name='student-login'),
     path('student/profile/', StudentProfileView.as_view(), name='student-profile'),
-    path('upload_photo/', upload_photo, name='upload_photo'),
+    path('upload_photo/', UploadPhotoView.as_view(), name='upload_photo'),
 
     # Teacher URLs
     path('teacher/register/', TeacherRegistrationView.as_view(), name='teacher-register'),
@@ -31,4 +31,4 @@ urlpatterns = [
 ]
 
 
- 
+    
