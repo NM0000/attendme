@@ -19,79 +19,76 @@ class _TeacherRegisterScreenState extends State<TeacherRegisterScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
-  final TextEditingController _otpController = TextEditingController();
 
   Future<void> _register() async {
     if (_formKey.currentState!.validate()) {
-      final response = await http.post(
-        Uri.parse('http://10.0.2.2:3000/api/auth/teachers/register/'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, String>{
-          'teacher_id': _idController.text,
-          'first_name': _firstNameController.text,
-          'last_name': _lastNameController.text,
-          'email': _emailController.text,
-          'password': _passwordController.text,
-          'password2': _confirmPasswordController.text,
-        }),
-      );
+      try {
+        final response = await http.post(
+          Uri.parse('http://192.168.1.2:8000/api/auth/teacher/register/'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(<String, String>{
+            'teacher_id': _idController.text,
+            'first_name': _firstNameController.text,
+            'last_name': _lastNameController.text,
+            'email': _emailController.text,
+            'password': _passwordController.text,
+            'password2': _confirmPasswordController.text,
+          }),
+        );
 
-      if (response.statusCode == 201) {
-        final responseBody = jsonDecode(response.body);
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('access', responseBody['access']);
-        await prefs.setString('refresh', responseBody['refresh']);
+        if (response.statusCode == 201) {
+          final jsonResponse = jsonDecode(response.body);
 
-        _showOtpDialog();
-      } else {
-        _showFailureDialog('Registration failed. Please try again.');
+          // Extract tokens from the response
+          final tokenData = jsonResponse['token'];
+          final accessToken = tokenData['access'];
+          final refreshToken = tokenData['refresh'];
+
+          if (accessToken != null && refreshToken != null) {
+            SharedPreferences prefs = await SharedPreferences.getInstance();
+            await prefs.setString('access', accessToken);
+            await prefs.setString('refresh', refreshToken);
+
+            // After registration, call the GET request to fetch teacher data
+            await _getTeacherData(_idController.text); // Call GET after registration
+
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const ChooseOptionScreen()),
+              (route) => false,
+            );
+          } else {
+            _showFailureDialog('Failed to retrieve tokens from the response.');
+          }
+        } else {
+          _showFailureDialog('Registration failed. Status Code: ${response.statusCode}');
+        }
+      } catch (e) {
+        _showFailureDialog('An error occurred: $e');
       }
     }
   }
 
-  void _showOtpDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Enter OTP'),
-          content: TextField(
-            controller: _otpController,
-            decoration: const InputDecoration(hintText: 'OTP'),
-          ),
-          actions: [
-            TextButton(
-              onPressed: _verifyOtp,
-              child: const Text('Verify'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _verifyOtp() async {
-    final response = await http.post(
-      Uri.parse('http://10.0.0.2/api/auth/teacher/register/'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, String>{
-        'teacher_id': _idController.text,
-        'otp': _otpController.text,
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const ChooseOptionScreen()),
-        (route) => false,
+  Future<void> _getTeacherData(String teacherId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://192.168.1.2:8000/api/auth/teacher/$teacherId/'), // Adjust URL based on your backend endpoint
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
       );
-    } else {
-      _showFailureDialog('OTP verification failed. Please try again.');
+
+      if (response.statusCode == 200) {
+        // Use the response data (this can be displayed, processed, etc.)
+        final teacherData = jsonDecode(response.body);
+        print('Teacher Data: $teacherData'); // Example of using the data
+      } else {
+        print('Failed to fetch teacher data');
+      }
+    } catch (e) {
+      print('Error fetching teacher data: $e');
     }
   }
 

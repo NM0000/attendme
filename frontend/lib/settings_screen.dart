@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -10,30 +12,73 @@ class SettingsScreen extends StatelessWidget {
     Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
   }
 
-  void _showLogoutConfirmation(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Logout'),
-          content: const Text('Are you sure you want to log out?'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Logout'),
-              onPressed: () {
-                _logout(context);
-              },
-            ),
-          ],
-        );
-      },
+  Future<bool> _validateCurrentPassword(String currentPassword) async {
+    // Replace with your backend API URL for password validation
+    const url = 'https://your-backend-api.com/validate-current-password';
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'password': currentPassword}),
     );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return data['valid']; // Ensure this is a boolean value
+    } else {
+      throw Exception('Failed to validate password.');
+    }
+  }
+
+  Future<void> _changePassword(
+      BuildContext context,
+      String currentPassword,
+      String newPassword,
+      String confirmPassword) async {
+    try {
+      final isCurrentPasswordValid = await _validateCurrentPassword(currentPassword);
+
+      if (!isCurrentPasswordValid) {
+        _showFeedbackDialog(context, 'Error', 'Current password is incorrect.');
+        return;
+      }
+
+      if (newPassword != confirmPassword) {
+        _showFeedbackDialog(context, 'Error', 'New password and confirm password do not match.');
+        return;
+      }
+
+      if (newPassword == currentPassword) {
+        _showFeedbackDialog(context, 'Error', 'New password cannot be the same as the current password.');
+        return;
+      }
+
+      // Replace with your backend API URL for password change
+      const url = 'http://192.168.1.2:8000/api/auth/changepassword/';
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'currentPassword': currentPassword,
+          'newPassword': newPassword,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success']) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('password', newPassword);
+          Navigator.of(context).pop(); // Close the change password dialog
+          _showFeedbackDialog(context, 'Success', 'Password has been changed successfully.');
+        } else {
+          _showFeedbackDialog(context, 'Error', data['message']);
+        }
+      } else {
+        _showFeedbackDialog(context, 'Error', 'Failed to change password. Please try again later.');
+      }
+    } catch (e) {
+      _showFeedbackDialog(context, 'Error', e.toString());
+    }
   }
 
   void _showChangePasswordDialog(BuildContext context) {
@@ -80,22 +125,7 @@ class SettingsScreen extends StatelessWidget {
                 String newPassword = newPasswordController.text.trim();
                 String confirmPassword = confirmPasswordController.text.trim();
 
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                String? storedPassword = prefs.getString('password');
-
-                if (storedPassword == null) {
-                  _showFeedbackDialog(context, 'Error', 'No password has been set.');
-                } else if (storedPassword != currentPassword) {
-                  _showFeedbackDialog(context, 'Error', 'Current password is incorrect.');
-                } else if (newPassword != confirmPassword) {
-                  _showFeedbackDialog(context, 'Error', 'New password and confirm password do not match.');
-                } else if (newPassword == currentPassword) {
-                  _showFeedbackDialog(context, 'Error', 'New password cannot be the same as the current password.');
-                } else {
-                  await prefs.setString('password', newPassword);
-                  Navigator.of(context).pop(); // Close the change password dialog
-                  _showFeedbackDialog(context, 'Success', 'Password has been changed successfully.');
-                }
+                await _changePassword(context, currentPassword, newPassword, confirmPassword);
               },
             ),
           ],
@@ -124,6 +154,32 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
+  void _showLogoutConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Logout'),
+          content: const Text('Are you sure you want to log out?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Logout'),
+              onPressed: () async {
+                await _logout(context); // Call the _logout method
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool isMobile = MediaQuery.of(context).size.width < 600;
@@ -140,7 +196,7 @@ class SettingsScreen extends StatelessWidget {
         ),
         backgroundColor: Colors.brown[300], // Consistent with ChooseOptionScreen
         leading: IconButton(
-          icon: Icon(Icons.arrow_back,color: Colors.white, size: isMobile ? 32.0 : 40.0),
+          icon: Icon(Icons.arrow_back, color: Colors.white, size: isMobile ? 32.0 : 40.0),
           onPressed: () {
             Navigator.of(context).pop();
           },

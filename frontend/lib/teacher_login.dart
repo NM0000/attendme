@@ -1,4 +1,5 @@
-//changes done
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'teacher_home_screen.dart';
 import 'forgot_password_screen.dart';
@@ -15,33 +16,48 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  void _login() {
+  Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
-      String email = _emailController.text;
+      String emailOrTeacherId = _emailController.text;
       String password = _passwordController.text;
 
-      if (_validateCredentials(email, password)) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const TeacherHomeScreen()),
-        );
+      var response = await http.post(
+        Uri.parse('http://192.168.1.2:8000/api/auth/teacher/login/'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email_or_teacher_id': emailOrTeacherId,
+          'password': password,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        var jsonResponse = jsonDecode(response.body);
+
+        // Print the entire response for debugging
+        print('Response: $jsonResponse');
+
+        // Check if token is present
+        if (jsonResponse.containsKey('token')) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const TeacherHomeScreen()),
+          );
+        } else {
+          _showErrorDialog(jsonResponse['message'] ?? 'Login failed');
+        }
       } else {
-        _showErrorDialog();
+        _showErrorDialog('An error occurred. Please try again.');
       }
     }
   }
 
-  bool _validateCredentials(String email, String password) {
-    return email == 'teacher' && password == '123';
-  }
-
-  void _showErrorDialog() {
+  void _showErrorDialog(String message) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Login Failed'),
-          content: const Text('Incorrect Teacher ID/Email or Password.'),
+          content: Text(message),
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -122,7 +138,8 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
                           decoration: const InputDecoration(
                             labelText: 'Teacher Id/ Email',
                             border: OutlineInputBorder(),
-                            labelStyle: TextStyle(color: Colors.brown), // Sombre Brown
+                            labelStyle:
+                                TextStyle(color: Colors.brown), // Sombre Brown
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -137,7 +154,8 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
                           decoration: const InputDecoration(
                             labelText: 'Password',
                             border: OutlineInputBorder(),
-                            labelStyle: TextStyle(color: Colors.brown), // Sombre Brown
+                            labelStyle:
+                                TextStyle(color: Colors.brown), // Sombre Brown
                           ),
                           obscureText: true,
                           validator: (value) {
@@ -153,7 +171,8 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => ForgotPasswordScreen(isTeacher: true),
+                                builder: (context) =>
+                                    ForgotPasswordScreen(isTeacher: true),
                               ),
                             );
                           },
@@ -172,7 +191,8 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
                             padding: EdgeInsets.all(screenWidth * 0.04),
                             decoration: BoxDecoration(
                               color: Colors.brown, // Sombre Brown
-                              borderRadius: BorderRadius.circular(screenWidth * 0.02),
+                              borderRadius:
+                                  BorderRadius.circular(screenWidth * 0.02),
                             ),
                             child: Center(
                               child: Text(

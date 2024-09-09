@@ -35,13 +35,28 @@ def get_tokens_for_user(user):
     }
 
 # Teacher Registration View
+
 class TeacherRegistrationView(APIView):
     def post(self, request, format=None):
         serializer = TeacherRegistrationSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        token = get_tokens_for_user(user)
-        return Response({'token': token, 'msg': 'Teacher Registration Successful'}, status=status.HTTP_201_CREATED)
+        if serializer.is_valid():
+            user = serializer.save()
+            token = get_tokens_for_user(user)
+            return Response(
+                {
+                    'token': token, 
+                    'msg': 'Teacher Registration Successful'
+                }, 
+                status=status.HTTP_201_CREATED
+            )
+        else:
+            return Response(
+                {
+                    'errors': serializer.errors, 
+                    'msg': 'Teacher Registration Failed'
+                }, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 # Student Registration View
 class StudentRegistrationView(APIView):
@@ -132,14 +147,14 @@ class UploadPhotoView(APIView):
             return Response({'message': 'Photo uploaded successfully'}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
-# Payload Reception View
-@csrf_exempt
-def receive_payload(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        key1 = data.get('key1')
-        key2 = data.get('key2')
-        # Process the data here
-        return JsonResponse({'status': 'success', 'data': data})
-    else:
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+# # Payload Reception View
+# @csrf_exempt
+# def receive_payload(request):
+#     if request.method == 'POST':
+#         data = json.loads(request.body)
+#         key1 = data.get('key1')
+#         key2 = data.get('key2')
+#         # Process the data here
+#         return JsonResponse({'status': 'success', 'data': data})
+#     else:
+#         return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
