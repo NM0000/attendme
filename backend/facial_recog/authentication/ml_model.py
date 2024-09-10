@@ -1,13 +1,11 @@
 # authentication/ml_model.py
 import joblib
+from PIL import Image
+import numpy as np
 
-# Load your model
-def load_model():
-    model_path = 'path_to_your_model/model.pkl'
-    model = joblib.load(model_path)
-    return model
 
-# authentication/ml_model.py
+
+
 from .utils import preprocess_image  # Import a function to preprocess images
 
 model = load_model()  # Load the model once
@@ -23,9 +21,6 @@ def update_model(student_id, photo_path):
     # Add your logic to update the model with new encoding
     # e.g., model.update(student_id, encoding)
 
-# authentication/ml_model.py
-from PIL import Image
-import numpy as np
 
 def preprocess_image(photo_path):
     # Open and preprocess the image

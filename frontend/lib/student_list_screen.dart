@@ -21,7 +21,7 @@ class _StudentListPageState extends State<StudentListPage> {
   }
 
   Future<void> _fetchStudents() async {
-    final response = await http.get(Uri.parse('http://192.168.1.2:8000/api/student/'));
+    final response = await http.get(Uri.parse('http://192.168.1.2:8000/api/auth/student/'));
 
     if (response.statusCode == 200) {
       setState(() {

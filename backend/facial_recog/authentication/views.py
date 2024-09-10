@@ -10,7 +10,6 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import User 
-# StudentImage
 from .serializers import (
     TeacherRegistrationSerializer,
     StudentRegistrationSerializer,
@@ -93,6 +92,11 @@ class StudentProfileView(APIView):
     def get(self, request, format=None):
         serializer = StudentProfileSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class StudentListAPI(APIView):
+    def get(self, request):
+        students = User.objects.filter(student_id__isnull=False).values('student_id','first_name', 'last_name', 'email','batch','enrolled_year')
+        return Response(students, status=status.HTTP_200_OK)
 
 # Teacher Profile View
 class TeacherProfileView(APIView):
@@ -102,6 +106,11 @@ class TeacherProfileView(APIView):
     def get(self, request, format=None):
         serializer = TeacherProfileSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class TeacherListAPI(APIView):
+    def get(self, request):
+        teachers = User.objects.filter(teacher_id__isnull=False).values('first_name', 'last_name', 'email')
+        return Response(teachers, status=status.HTTP_200_OK)
 
 # User Change Password View
 class UserChangePasswordView(APIView):
@@ -130,6 +139,7 @@ class UserPasswordResetView(APIView):
         serializer = UserPasswordResetSerializer(data=request.data, context={'uid': uid, 'token': token})
         serializer.is_valid(raise_exception=True)
         return Response({'msg': 'Password reset successfully.'}, status=status.HTTP_200_OK)
+
 class UploadPhotoView(APIView):
 
     def post(self, request, *args, **kwargs):
@@ -146,6 +156,67 @@ class UploadPhotoView(APIView):
             serializer.save()
             return Response({'message': 'Photo uploaded successfully'}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+from .utils import svc_model
+from PIL import Image
+import numpy as np
+import io
+from PIL import Image
+import numpy as np
+from sklearn.decomposition import PCA
+import joblib
+
+class ImageRecognition(APIView):
+    def post(self, request, *args, **kwargs):
+        image_file = request.FILES.get('image', None)
+
+        if image_file is None:
+            return JsonResponse({'error': 'No image file uploaded'}, status=400)
+
+        # Load the image and preprocess
+        img = Image.open(image_file)
+        img = img.resize((64, 64))  # Example resizing
+        img_array = np.array(img).flatten()
+
+        # Load pre-trained PCA model
+        with open('pca_model.pkl', 'rb') as pca_file:
+            pca = joblib.load(pca_file)
+
+        # Apply PCA transformation (do not use fit_transform)
+        reduced_img_array = pca.transform([img_array])
+
+        # Use the reduced features for model prediction
+        prediction = svc_model.predict(reduced_img_array)
+
+        return JsonResponse({'prediction': prediction[0]})
+
+
+
+# #imageprediction
+# class ImagePredictView(APIView):
+#     def post(self, request):
+#         # Handle image upload
+#         image_file = request.FILES.get('image')
+        
+#         if not image_file:
+#             return JsonResponse({'error': 'No image file provided'}, status=400)
+
+#         try:
+#             # Open the image using PIL
+#             image = Image.open(image_file)
+            
+#             # Preprocess the image (resize, convert to grayscale, flatten, etc.)
+#             image = image.resize((64, 64))  # Adjust based on your model's requirements
+#             image_array = np.array(image).flatten()  # Convert image to a flat array
+#             image_array = image_array.reshape(1, -1)  # Reshape for model input
+            
+#             # Make the prediction using the loaded model
+#             prediction = svc_model.predict(image_array)
+#             result = prediction[0]
+#         except Exception as e:
+#             return JsonResponse({'error': str(e)}, status=500)
+
+#         return JsonResponse({'prediction': result}, status=200)
         
 # # Payload Reception View
 # @csrf_exempt

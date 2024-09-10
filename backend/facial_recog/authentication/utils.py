@@ -11,3 +11,13 @@ class Util:
             to=[data['to_email']]  # Recipient's email
         )
         email.send()
+
+
+import joblib
+import os
+
+# Make sure the correct path is used
+model_path = r'D:\IIMS COLLEGE\Bcs 8th sem\attendme\SVC_modell.pkl'
+
+# Load the model using joblib
+svc_model = joblib.load(model_path)
