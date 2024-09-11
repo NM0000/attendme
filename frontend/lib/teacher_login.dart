@@ -46,7 +46,7 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
           _showErrorDialog(jsonResponse['message'] ?? 'Login failed');
         }
       } else {
-        _showErrorDialog('An error occurred. Please try again.');
+        _showErrorDialog('Invalid credentials! Please try again');
       }
     }
   }

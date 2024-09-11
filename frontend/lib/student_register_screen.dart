@@ -45,7 +45,7 @@ class _StudentRegisterScreenState extends State<StudentRegisterScreen> {
     if (_formKey.currentState!.validate() && _capturedImagePaths.isNotEmpty) {
       final request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://10.0.2.2/api/accounts/register/'),
+        Uri.parse('http://192.168.1.2:8000/api/auth/student/register/'),
       );
       request.fields['studentId'] = _studentIdController.text;
       request.fields['password'] = _passwordController.text;
@@ -271,19 +271,15 @@ class _StudentRegisterScreenState extends State<StudentRegisterScreen> {
                           'Register',
                           style: TextStyle(
                             fontSize: isMobile ? 16.0 : 18.0,
-                            color: Colors.black,
+                            color: Colors.white,
                           ),
                         ),
                         style: ElevatedButton.styleFrom(
                           padding: EdgeInsets.symmetric(vertical: isMobile ? 12.0 : 16.0),
-                          backgroundColor: Colors.white,
+                          backgroundColor: Colors.brown[800],
                           minimumSize: Size(isMobile ? screenWidth * 0.8 : screenWidth * 0.7, isMobile ? screenHeight * 0.05 : screenHeight * 0.07),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          side: BorderSide(
-                            color: Colors.brown[800]!,
-                            width: 2.0,
                           ),
                         ),
                       ),
@@ -302,28 +298,18 @@ class _StudentRegisterScreenState extends State<StudentRegisterScreen> {
     required TextEditingController controller,
     required String labelText,
     bool obscureText = false,
-    FormFieldValidator<String>? validator,
+    String? Function(String?)? validator,
   }) {
-    final double screenWidth = MediaQuery.of(context).size.width;
-
     return TextFormField(
       controller: controller,
+      obscureText: obscureText,
       decoration: InputDecoration(
         labelText: labelText,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.0),
         ),
-        contentPadding: EdgeInsets.symmetric(
-            horizontal: screenWidth * 0.04, vertical: screenWidth * 0.03),
       ),
-      obscureText: obscureText,
-      validator: validator ??
-          (value) {
-            if (value == null || value.isEmpty) {
-              return 'Please enter your $labelText';
-            }
-            return null;
-          },
+      validator: validator,
     );
   }
 }

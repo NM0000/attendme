@@ -7,6 +7,7 @@ import 'take_attendance_screen.dart';
 import 'student_list_screen.dart';
 import 'teacher_reports_screen.dart';
 import 'settings_screen.dart';
+import 'teacher_profile_screen.dart'; // Import the teacher profile screen
 
 class TeacherHomeScreen extends StatefulWidget {
   const TeacherHomeScreen({super.key});
@@ -69,10 +70,18 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            CircleAvatar(
-              backgroundColor: Colors.grey[200],
-              radius: screenWidth * 0.06, // Responsive avatar size
-              child: Icon(Icons.person, size: screenWidth * 0.06),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => TeacherProfileScreen()),
+                );
+              },
+              child: CircleAvatar(
+                backgroundColor: Colors.grey[200],
+                radius: screenWidth * 0.06, // Responsive avatar size
+                child: Icon(Icons.person, size: screenWidth * 0.06),
+              ),
             ),
             const Spacer(),
             IconButton(
@@ -284,7 +293,9 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
           ),
           calendarStyle: CalendarStyle(
             todayDecoration: BoxDecoration(
-              color: Colors.blueAccent,
+             
+
+ color: Colors.blueAccent,
               shape: BoxShape.circle,
               border: Border.all(
                 color: Colors.blue,
@@ -300,14 +311,14 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
               color: Colors.black, // Text color
             ),
             weekendTextStyle: TextStyle(
-              fontSize: screenWidth * 0.04, // Responsive font
-            
+              fontSize: screenWidth * 0.04, // Responsive font size
+              color: Colors.black, // Text color
+            ),
           ),
         ),
       ),
-    ),  
-  );
-}
+    );
+  }
 
   void _showRemindersDialog(DateTime selectedDay) {
     final dateStr = DateFormat.yMd().format(selectedDay);
@@ -368,57 +379,59 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       },
     );
   }
-void _showMenu(BuildContext context, double screenWidth) {
-  showModalBottomSheet(
-    context: context,
-    builder: (BuildContext context) {
-      return SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: Icon(Icons.add, size: screenWidth * 0.07, color: Colors.black),
-              title: Text(
-                'Add Reminder',
-                style: TextStyle(
-                  fontSize: screenWidth * 0.045, // Smaller text size
-                  color: Colors.black,
-                ),
-              ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => AddReminderScreen(
-                      onReminderAdded: () {
-                        _loadReminders();
-                      },
-                    ),
+
+  void _showMenu(BuildContext context, double screenWidth) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.add, size: screenWidth * 0.07, color: Colors.black),
+                title: Text(
+                  'Add Reminder',
+                  style: TextStyle(
+                    fontSize: screenWidth * 0.045, // Smaller text size
+                    color: Colors.black,
                   ),
-                );
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.settings, size: screenWidth * 0.07, color: Colors.black),
-              title: Text(
-                'Settings',
-                style: TextStyle(
-                  fontSize: screenWidth * 0.045, // Smaller text size
-                  color: Colors.black,
                 ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AddReminderScreen(
+                        onReminderAdded: () {
+                          _loadReminders();
+                        },
+                      ),
+                    ),
+                  );
+                },
               ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SettingsScreen()),
-                );
-              },
-            ),
-          ],
-        ),
-      );
-    },
-  );
-}
+              ListTile(
+                leading: Icon(Icons.settings, size: screenWidth * 0.07, color: Colors.black),
+                title: Text(
+                  'Settings',
+                  style: TextStyle(
+                    fontSize: screenWidth * 0.045, // Smaller text size
+                    color: Colors.black,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => SettingsScreen()),
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   final ScrollController _scrollController = ScrollController();
 }

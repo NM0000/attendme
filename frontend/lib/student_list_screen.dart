@@ -21,12 +21,14 @@ class _StudentListPageState extends State<StudentListPage> {
   }
 
   Future<void> _fetchStudents() async {
-    final response = await http.get(Uri.parse('http://192.168.1.2:8000/api/auth/student/'));
+    final response =
+        await http.get(Uri.parse('http://192.168.1.2:8000/api/auth/student/'));
 
     if (response.statusCode == 200) {
       setState(() {
         students = jsonDecode(response.body);
-        filteredStudents = students; // Initially, filtered students are all students
+        filteredStudents =
+            students; // Initially, filtered students are all students
       });
     } else {
       // Handle error
@@ -34,19 +36,20 @@ class _StudentListPageState extends State<StudentListPage> {
     }
   }
 
-  void _filterStudents() {
-    setState(() {
-      filteredStudents = students.where((student) {
-        final matchesBatch = selectedBatch.isEmpty || student['batch'] == selectedBatch;
-        final matchesYear = selectedYear == null || student['enrolled_year'] == selectedYear;
-        final matchesSearch = searchQuery.isEmpty ||
-            student['first_name'].toLowerCase().contains(searchQuery.toLowerCase()) ||
-            student['last_name'].toLowerCase().contains(searchQuery.toLowerCase());
+void _filterStudents() {
+  setState(() {
+    filteredStudents = students.where((student) {
+      final matchesBatch = selectedBatch.isEmpty ||
+          student['batch'].toString().toLowerCase() == selectedBatch.toLowerCase();
+      final matchesYear = selectedYear == null || student['enrolled_year'] == selectedYear;
+      final matchesSearch = searchQuery.isEmpty ||
+          student['first_name'].toLowerCase().contains(searchQuery.toLowerCase()) ||
+          student['last_name'].toLowerCase().contains(searchQuery.toLowerCase());
 
-        return matchesBatch && matchesYear && matchesSearch;
-      }).toList();
-    });
-  }
+      return matchesBatch && matchesYear && matchesSearch;
+    }).toList();
+  });
+}
 
   void _showFilterDialog() {
     showDialog(
@@ -61,8 +64,22 @@ class _StudentListPageState extends State<StudentListPage> {
                 decoration: InputDecoration(labelText: 'Select Batch (Month)'),
                 value: selectedBatch.isEmpty ? null : selectedBatch,
                 items: [
-                  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-                ].map((month) => DropdownMenuItem(value: month, child: Text(month))).toList(),
+                  'January',
+                  'February',
+                  'March',
+                  'April',
+                  'May',
+                  'June',
+                  'July',
+                  'August',
+                  'September',
+                  'October',
+                  'November',
+                  'December'
+                ]
+                    .map((month) =>
+                        DropdownMenuItem(value: month, child: Text(month)))
+                    .toList(),
                 onChanged: (value) {
                   setState(() {
                     selectedBatch = value ?? '';
@@ -72,9 +89,9 @@ class _StudentListPageState extends State<StudentListPage> {
               DropdownButtonFormField<int>(
                 decoration: InputDecoration(labelText: 'Select Year'),
                 value: selectedYear,
-                items: List.generate(
-                        101, (index) => 2000 + index)
-                    .map((year) => DropdownMenuItem(value: year, child: Text('$year')))
+                items: List.generate(101, (index) => 2000 + index)
+                    .map((year) =>
+                        DropdownMenuItem(value: year, child: Text('$year')))
                     .toList(),
                 onChanged: (value) {
                   setState(() {
@@ -157,21 +174,31 @@ class _StudentListPageState extends State<StudentListPage> {
               ],
             ),
           ),
-          // Student List
+          // Student Data Table
           Expanded(
             child: filteredStudents.isEmpty
                 ? Center(child: Text('No students found'))
-                : ListView.builder(
-                    itemCount: filteredStudents.length,
-                    itemBuilder: (context, index) {
-                      final student = filteredStudents[index];
-                      return ListTile(
-                        title: Text('${student['first_name']} ${student['last_name']}'),
-                        subtitle: Text(
-                            'ID: ${student['student_id']}, Batch: ${student['batch']}, Year: ${student['enrolled_year']}'),
-                        trailing: Text('Email: ${student['email']}'),
-                      );
-                    },
+                : SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: DataTable(
+                      columns: const [
+                        DataColumn(label: Text('ID')),
+                        DataColumn(label: Text('Name')),
+                        DataColumn(label: Text('Batch')),
+                        DataColumn(label: Text('Year')),
+                        DataColumn(label: Text('Email')),
+                      ],
+                      rows: filteredStudents.map((student) {
+                        return DataRow(cells: [
+                          DataCell(Text(student['student_id'].toString())),
+                          DataCell(Text(
+                              '${student['first_name']} ${student['last_name']}')),
+                          DataCell(Text(student['batch'])),
+                          DataCell(Text(student['enrolled_year'].toString())),
+                          DataCell(Text(student['email'])),
+                        ]);
+                      }).toList(),
+                    ),
                   ),
           ),
         ],

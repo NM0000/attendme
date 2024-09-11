@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
-import 'package:image/image.dart' as img;
 import 'package:camera/camera.dart';
 
 class FaceCaptureScreen extends StatefulWidget {
@@ -26,7 +25,6 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
     ),
   );
   List<String> _capturedImagePaths = [];
-  bool _isDetecting = false;
   bool _isPreviewVisible = false; // To control visibility of preview
 
   @override
@@ -44,46 +42,6 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
     );
     _initializeControllerFuture = _cameraController!.initialize().then((_) {
       setState(() {});
-      _startImageStream();
-    });
-  }
-
-  void _startImageStream() {
-    _cameraController?.startImageStream((CameraImage cameraImage) async {
-      if (_isDetecting) return;
-      _isDetecting = true;
-
-      // Convert the camera image to a format compatible with the ML Kit
-      final bytes = cameraImage.planes.fold<Uint8List>(
-        Uint8List(0),
-        (buffer, plane) => Uint8List.fromList(buffer + plane.bytes),
-      );
-
-      final image = InputImage.fromBytes(
-        bytes: bytes,
-        inputImageData: InputImageData(
-          size: Size(cameraImage.width.toDouble(), cameraImage.height.toDouble()),
-          imageRotation: InputImageRotation.Rotation_0deg,
-          inputImageFormat: InputImageFormat.NV21,
-          planeData: cameraImage.planes.map(
-            (plane) {
-              return InputImagePlaneMetadata(
-                bytesPerRow: plane.bytesPerRow,
-                height: cameraImage.height,
-                width: cameraImage.width,
-              );
-            },
-          ).toList(),
-        ),
-      );
-
-      final faces = await _faceDetector.processImage(image);
-      if (faces.isNotEmpty) {
-        // If a face is detected, capture the image
-        _captureImage();
-      }
-
-      _isDetecting = false;
     });
   }
 
@@ -94,8 +52,8 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
       setState(() {});
 
       // If you want to stop the stream after capturing enough images
-      if (_capturedImagePaths.length >= 5) { // Adjust the count as needed
-        _cameraController?.stopImageStream();
+      if (_capturedImagePaths.length >= 10) { // Adjust the count as needed
+        _cameraController?.dispose();
         setState(() {
           _isPreviewVisible = true; // Show preview after capturing images
         });
@@ -164,15 +122,20 @@ class _FaceCaptureScreenState extends State<FaceCaptureScreen> {
                 ),
               ),
             ),
-          if (!_isPreviewVisible) // Remove photo count if preview is visible
+          if (!_isPreviewVisible) // Show capture button if preview is not visible
             Expanded(
               flex: 1,
               child: Container(
                 alignment: Alignment.center,
                 padding: EdgeInsets.all(8.0),
-                child: Text(
-                  'Captured Images: ${_capturedImagePaths.length}',
-                  style: TextStyle(fontSize: 18),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: _captureImage,
+                      child: Text('Capture Image'),
+                    ),
+                  ],
                 ),
               ),
             ),

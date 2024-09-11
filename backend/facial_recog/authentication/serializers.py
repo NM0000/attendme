@@ -55,7 +55,6 @@ class StudentRegistrationSerializer(serializers.ModelSerializer):
         validated_data.pop('password2', None)
         return User.objects.create_user(**validated_data, is_staff=False)
 
-
 # Teacher Login Serializer
 class TeacherLoginSerializer(serializers.Serializer):
     email_or_teacher_id = serializers.CharField()
@@ -66,17 +65,23 @@ class TeacherLoginSerializer(serializers.Serializer):
         password = data.get('password')
 
         user = None
+        # Authenticate by email
         if '@' in email_or_teacher_id:
             user = authenticate(email=email_or_teacher_id, password=password)
+        # Authenticate by teacher_id
         else:
-            user = User.objects.filter(teacher_id=email_or_teacher_id).first()
-            if user and user.check_password(password):
-                return user
+            try:
+                user = User.objects.get(teacher_id=email_or_teacher_id)
+                if not user.check_password(password):
+                    raise serializers.ValidationError('Invalid credentials')
+            except User.DoesNotExist:
+                raise serializers.ValidationError('Invalid credentials')
 
+        # Ensure the user is a teacher (staff)
         if user is None or not user.is_staff:
             raise serializers.ValidationError('Invalid credentials')
-        return user
 
+        return user
 
 # Student Login Serializer
 class StudentLoginSerializer(serializers.Serializer):
@@ -88,15 +93,22 @@ class StudentLoginSerializer(serializers.Serializer):
         password = data.get('password')
 
         user = None
+        # Authenticate by email
         if '@' in email_or_student_id:
             user = authenticate(email=email_or_student_id, password=password)
+        # Authenticate by student_id
         else:
-            user = User.objects.filter(student_id=email_or_student_id).first()
-            if user and user.check_password(password):
-                return user
+            try:
+                user = User.objects.get(student_id=email_or_student_id)
+                if not user.check_password(password):
+                    raise serializers.ValidationError('Invalid credentials')
+            except User.DoesNotExist:
+                raise serializers.ValidationError('Invalid credentials')
 
+        # Ensure the user is not a staff member (only students can log in)
         if user is None or user.is_staff:
             raise serializers.ValidationError('Invalid credentials')
+
         return user
 
 
@@ -116,18 +128,33 @@ class TeacherProfileSerializer(serializers.ModelSerializer):
 
 # Change Password Serializer
 class UserChangePasswordSerializer(serializers.Serializer):
+    current_password = serializers.CharField(max_length=128, style={'input_type': 'password'}, write_only=True)
     password = serializers.CharField(max_length=128, style={'input_type': 'password'}, write_only=True)
     password2 = serializers.CharField(max_length=128, style={'input_type': 'password'}, write_only=True)
 
     def validate(self, attrs):
+        current_password = attrs.get('current_password')
         password = attrs.get('password')
         password2 = attrs.get('password2')
         user = self.context.get('user')
+
+        # Validate current password
+        if not user.check_password(current_password):
+            raise serializers.ValidationError("Current password is incorrect")
+
+        # Validate new password and confirm password
         if password != password2:
             raise serializers.ValidationError("Password and Confirm Password don't match")
-        user.set_password(password)
-        user.save()
+
         return attrs
+
+    def save(self, **kwargs):
+        user = self.context.get('user')
+        # Set new password
+        user.set_password(password)
+        user.save()  # Ensure the password change is saved in the database
+        return attrs
+
 
 
 # Send Password Reset Email Serializer

@@ -4,8 +4,6 @@ from PIL import Image
 import numpy as np
 
 
-
-
 from .utils import preprocess_image  # Import a function to preprocess images
 
 model = load_model()  # Load the model once

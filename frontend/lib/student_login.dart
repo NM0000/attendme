@@ -1,5 +1,7 @@
-//changes done
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'student_home_screen.dart';
 import 'forgot_password_screen.dart';
 
@@ -14,34 +16,57 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+Future<void> _login() async {
+  if (_formKey.currentState!.validate()) {
+    String emailOrStudentId = _emailController.text;
+    String password = _passwordController.text;
 
-  void _login() {
-    if (_formKey.currentState!.validate()) {
-      String email = _emailController.text;
-      String password = _passwordController.text;
+    var response = await http.post(
+      Uri.parse('http://192.168.1.2:8000/api/auth/student/login/'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email_or_student_id': emailOrStudentId,
+        'password': password,
+      }),
+    );
 
-      if (_validateCredentials(email, password)) {
+    if (response.statusCode == 200) {
+      var jsonResponse = jsonDecode(response.body);
+
+      // Print the entire response for debugging
+      print('Response: $jsonResponse');
+
+      // Check if 'token' key is present and contains 'access'
+      if (jsonResponse.containsKey('token') &&
+          jsonResponse['token'] is Map<String, dynamic> &&
+          jsonResponse['token'].containsKey('access')) {
+        String token = jsonResponse['token']['access'];
+
+        // Store token in SharedPreferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('access', token);
+
+        // Navigate to the StudentHomeScreen
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const StudentHomeScreen()),
         );
       } else {
-        _showErrorDialog();
+        _showErrorDialog(jsonResponse['message'] ?? 'Login failed');
       }
+    } else {
+      _showErrorDialog('Invalid credentials! Please try again');
     }
   }
+}
 
-  bool _validateCredentials(String email, String password) {
-    return email == 'student' && password == '123';
-  }
-
-  void _showErrorDialog() {
+  void _showErrorDialog(String message) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Login Failed'),
-          content: const Text('Incorrect Student ID/Email or Password.'),
+          content: Text(message),
           actions: <Widget>[
             TextButton(
               onPressed: () {

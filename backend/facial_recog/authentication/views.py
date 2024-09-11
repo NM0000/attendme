@@ -119,8 +119,8 @@ class UserChangePasswordView(APIView):
 
     def post(self, request, format=None):
         serializer = UserChangePasswordSerializer(data=request.data, context={'user': request.user})
-        serializer.is_valid(raise_exception=True)
-        return Response({'msg': 'Password Changed Successfully'}, status=status.HTTP_200_OK)
+        if serializer.is_valid(raise_exception=True):
+          return Response({'msg': 'Password Changed Successfully'}, status=status.HTTP_200_OK)
 
 # Send Password Reset Email View
 class SendPasswordResetEmailView(APIView):
