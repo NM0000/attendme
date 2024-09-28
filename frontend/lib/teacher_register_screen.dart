@@ -24,7 +24,7 @@ class _TeacherRegisterScreenState extends State<TeacherRegisterScreen> {
     if (_formKey.currentState!.validate()) {
       try {
         final response = await http.post(
-          Uri.parse('http://192.168.1.2:8000/api/auth/teacher/register/'),
+          Uri.parse('http://192.168.1.8:8000/api/auth/teacher/register/'),
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
           },
@@ -51,14 +51,8 @@ class _TeacherRegisterScreenState extends State<TeacherRegisterScreen> {
             await prefs.setString('access', accessToken);
             await prefs.setString('refresh', refreshToken);
 
-            // After registration, call the GET request to fetch teacher data
-            await _getTeacherData(_idController.text); // Call GET after registration
-
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => const ChooseOptionScreen()),
-              (route) => false,
-            );
+            // Show success dialog after successful registration
+            _showSuccessDialog('Registration successful!');
           } else {
             _showFailureDialog('Failed to retrieve tokens from the response.');
           }
@@ -71,25 +65,27 @@ class _TeacherRegisterScreenState extends State<TeacherRegisterScreen> {
     }
   }
 
-  Future<void> _getTeacherData(String teacherId) async {
-    try {
-      final response = await http.get(
-        Uri.parse('http://192.168.1.2:8000/api/auth/teacher/$teacherId/'), // Adjust URL based on your backend endpoint
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        // Use the response data (this can be displayed, processed, etc.)
-        final teacherData = jsonDecode(response.body);
-        print('Teacher Data: $teacherData'); // Example of using the data
-      } else {
-        print('Failed to fetch teacher data');
-      }
-    } catch (e) {
-      print('Error fetching teacher data: $e');
-    }
+  void _showSuccessDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Success'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => const ChooseOptionScreen()),
+                (route) => false,
+              );
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showFailureDialog(String message) {
@@ -252,13 +248,12 @@ class _TeacherRegisterScreenState extends State<TeacherRegisterScreen> {
       ),
       obscureText: obscureText,
       keyboardType: keyboardType,
-      validator: validator ??
-          (value) {
-            if (value == null || value.isEmpty) {
-              return 'Please enter your $labelText';
-            }
-            return null;
-          },
+      validator: validator ?? (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter your $labelText';
+        }
+        return null;
+      },
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'teacher_home_screen.dart';
 import 'forgot_password_screen.dart';
 
@@ -22,7 +23,7 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
       String password = _passwordController.text;
 
       var response = await http.post(
-        Uri.parse('http://192.168.1.2:8000/api/auth/teacher/login/'),
+        Uri.parse('http://192.168.1.8:8000/api/auth/teacher/login/'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'email_or_teacher_id': emailOrTeacherId,
@@ -36,8 +37,17 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
         // Print the entire response for debugging
         print('Response: $jsonResponse');
 
-        // Check if token is present
-        if (jsonResponse.containsKey('token')) {
+        // Check if 'token' key is present and contains 'access'
+        if (jsonResponse.containsKey('token') &&
+            jsonResponse['token'] is Map<String, dynamic> &&
+            jsonResponse['token'].containsKey('access')) {
+          String token = jsonResponse['token']['access'];
+
+          // Store token in SharedPreferences
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString('access', token);
+
+          // Navigate to the TeacherHomeScreen
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const TeacherHomeScreen()),

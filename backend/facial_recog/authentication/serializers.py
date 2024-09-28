@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from .models import User 
-# Image
+from .models import User
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.utils.encoding import force_bytes, smart_str, DjangoUnicodeDecodeError
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
@@ -34,11 +33,15 @@ class TeacherRegistrationSerializer(serializers.ModelSerializer):
 
 # Student Registration Serializer
 class StudentRegistrationSerializer(serializers.ModelSerializer):
-    password2 = serializers.CharField(style={'input_type': 'password'}, write_only=True)
 
+    password2 = serializers.CharField(style={'input_type': 'password'}, write_only=True)
+    student_image = serializers.ImageField(required=True)  # Image upload field
     class Meta:
         model = User
-        fields = ['email', 'first_name', 'last_name', 'student_id', 'batch', 'enrolled_year', 'password', 'password2']
+        fields = [
+            'student_id', 'first_name', 'last_name', 'batch', 
+            'enrolled_year', 'email', 'password', 'password2', 'student_image'
+        ]
         extra_kwargs = {
             'password': {'write_only': True},
             'student_id': {'required': True},
@@ -50,6 +53,8 @@ class StudentRegistrationSerializer(serializers.ModelSerializer):
         if password != password2:
             raise serializers.ValidationError("Password and Confirm Password don't match")
         return attrs
+        
+
 
     def create(self, validated_data):
         validated_data.pop('password2', None)
@@ -202,8 +207,3 @@ class UserPasswordResetSerializer(serializers.Serializer):
             return attrs
         except DjangoUnicodeDecodeError:
             raise serializers.ValidationError('Token is not valid or expired')
-
-class StudentImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['student_id', 'profile_image']

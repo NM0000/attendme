@@ -1,6 +1,7 @@
 import os
 import json
 from django.http import JsonResponse
+from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
 from django.shortcuts import get_object_or_404
@@ -20,7 +21,6 @@ from .serializers import (
     SendPasswordResetEmailSerializer,
     UserPasswordResetSerializer,
     UserChangePasswordSerializer,
-    StudentImageSerializer
 )
 from .renderers import UserRenderer
 from django.contrib.auth import authenticate
@@ -34,7 +34,6 @@ def get_tokens_for_user(user):
     }
 
 # Teacher Registration View
-
 class TeacherRegistrationView(APIView):
     def post(self, request, format=None):
         serializer = TeacherRegistrationSerializer(data=request.data)
@@ -61,10 +60,16 @@ class TeacherRegistrationView(APIView):
 class StudentRegistrationView(APIView):
     def post(self, request, format=None):
         serializer = StudentRegistrationSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        token = get_tokens_for_user(user)
-        return Response({'token': token, 'msg': 'Student Registration Successful'}, status=status.HTTP_201_CREATED)
+        if serializer.is_valid():
+            student = serializer.save()  # Create student and handle images
+            token = get_tokens_for_user(student)  # Generate tokens
+            
+            return Response({
+                'token': token,
+                'msg': 'Student Registration Successful'
+            }, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # Teacher Login View
 class TeacherLoginView(APIView):
@@ -140,92 +145,13 @@ class UserPasswordResetView(APIView):
         serializer.is_valid(raise_exception=True)
         return Response({'msg': 'Password reset successfully.'}, status=status.HTTP_200_OK)
 
-class UploadPhotoView(APIView):
-
+class UploadImageAPIView(APIView):
     def post(self, request, *args, **kwargs):
-        student_id = request.data.get('student_id')
-        photo = request.FILES.get('photo')
+        if 'image' not in request.FILES:
+            return Response({'error': 'No image provided'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not student_id or not photo:
-            return Response({'error': 'Missing student_id or photo'}, status=status.HTTP_400_BAD_REQUEST)
+        image_file = request.FILES['image']  # Get the uploaded image
+        file_name = default_storage.save(image_file.name, ContentFile(image_file.read()))
+        file_url = default_storage.url(file_name)
 
-        student = get_object_or_404(User, student_id=student_id)
-
-        serializer = StudentImageSerializer(instance=student, data={'profile_image': photo}, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({'message': 'Photo uploaded successfully'}, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-from .utils import svc_model
-from PIL import Image
-import numpy as np
-import io
-from PIL import Image
-import numpy as np
-from sklearn.decomposition import PCA
-import joblib
-
-class ImageRecognition(APIView):
-    def post(self, request, *args, **kwargs):
-        image_file = request.FILES.get('image', None)
-
-        if image_file is None:
-            return JsonResponse({'error': 'No image file uploaded'}, status=400)
-
-        # Load the image and preprocess
-        img = Image.open(image_file)
-        img = img.resize((64, 64))  # Example resizing
-        img_array = np.array(img).flatten()
-
-        # Load pre-trained PCA model
-        with open('pca_model.pkl', 'rb') as pca_file:
-            pca = joblib.load(pca_file)
-
-        # Apply PCA transformation (do not use fit_transform)
-        reduced_img_array = pca.transform([img_array])
-
-        # Use the reduced features for model prediction
-        prediction = svc_model.predict(reduced_img_array)
-
-        return JsonResponse({'prediction': prediction[0]})
-
-
-
-# #imageprediction
-# class ImagePredictView(APIView):
-#     def post(self, request):
-#         # Handle image upload
-#         image_file = request.FILES.get('image')
-        
-#         if not image_file:
-#             return JsonResponse({'error': 'No image file provided'}, status=400)
-
-#         try:
-#             # Open the image using PIL
-#             image = Image.open(image_file)
-            
-#             # Preprocess the image (resize, convert to grayscale, flatten, etc.)
-#             image = image.resize((64, 64))  # Adjust based on your model's requirements
-#             image_array = np.array(image).flatten()  # Convert image to a flat array
-#             image_array = image_array.reshape(1, -1)  # Reshape for model input
-            
-#             # Make the prediction using the loaded model
-#             prediction = svc_model.predict(image_array)
-#             result = prediction[0]
-#         except Exception as e:
-#             return JsonResponse({'error': str(e)}, status=500)
-
-#         return JsonResponse({'prediction': result}, status=200)
-        
-# # Payload Reception View
-# @csrf_exempt
-# def receive_payload(request):
-#     if request.method == 'POST':
-#         data = json.loads(request.body)
-#         key1 = data.get('key1')
-#         key2 = data.get('key2')
-#         # Process the data here
-#         return JsonResponse({'status': 'success', 'data': data})
-#     else:
-#         return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+        return Response({'status': 'success', 'file_url': file_url}, status=status.HTTP_201_CREATED)

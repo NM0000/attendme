@@ -22,7 +22,7 @@ Future<void> _login() async {
     String password = _passwordController.text;
 
     var response = await http.post(
-      Uri.parse('http://192.168.1.2:8000/api/auth/student/login/'),
+      Uri.parse('http://192.168.1.8:8000/api/auth/student/login/'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'email_or_student_id': emailOrStudentId,

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from authentication.models import User
+from authentication.models import User, FaceRecognition
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 class UserModelAdmin(BaseUserAdmin):
@@ -21,3 +21,4 @@ class UserModelAdmin(BaseUserAdmin):
     filter_horizontal = []
 
 admin.site.register(User, UserModelAdmin)
+admin.site.register(FaceRecognition)

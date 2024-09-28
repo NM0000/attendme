@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -6,7 +7,7 @@ import 'choose_option_screen.dart';
 import 'face_capture_screen.dart';
 
 class StudentRegisterScreen extends StatefulWidget {
-  const StudentRegisterScreen({super.key});
+  const StudentRegisterScreen({Key? key}) : super(key: key);
 
   @override
   State<StudentRegisterScreen> createState() => _StudentRegisterScreenState();
@@ -29,8 +30,7 @@ class _StudentRegisterScreenState extends State<StudentRegisterScreen> {
     final capturedImagePaths = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            FaceCaptureScreen(studentId: _studentIdController.text),
+        builder: (context) => FaceCaptureScreen(studentId: _studentIdController.text),
       ),
     );
 
@@ -41,46 +41,48 @@ class _StudentRegisterScreenState extends State<StudentRegisterScreen> {
     }
   }
 
-  Future<void> _register() async {
-    if (_formKey.currentState!.validate() && _capturedImagePaths.isNotEmpty) {
-      final request = http.MultipartRequest(
-        'POST',
-        Uri.parse('http://192.168.1.2:8000/api/auth/student/register/'),
-      );
-      request.fields['studentId'] = _studentIdController.text;
-      request.fields['password'] = _passwordController.text;
-      request.fields['email'] = _emailController.text;
-      request.fields['batch'] = _batchController.text;
-      request.fields['first_name'] = _firstNameController.text;
-      request.fields['last_name'] = _lastNameController.text;
-      request.fields['enrolled_year'] = _enrolledYearController.text;
+Future<void> _register() async {
+  if (_formKey.currentState!.validate() && _capturedImagePaths.isNotEmpty) {
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse('http://192.168.1.8:8000/api/auth/student/register/'),  // Your registration endpoint URI
+    );
 
-      // Attach images to the request
-      for (String imagePath in _capturedImagePaths) {
-        request.files.add(await http.MultipartFile.fromPath(
-          'images',
-          imagePath,
-        ));
-      }
+    request.fields['studentId'] = _studentIdController.text;
+    request.fields['password'] = _passwordController.text;
+    request.fields['email'] = _emailController.text;
+    request.fields['batch'] = _batchController.text;
+    request.fields['first_name'] = _firstNameController.text;
+    request.fields['last_name'] = _lastNameController.text;
+    request.fields['enrolled_year'] = _enrolledYearController.text;
 
-      final response = await request.send();
-
-      if (response.statusCode == 201) {
-        final responseBody = await response.stream.bytesToString();
-        final parsedResponse = jsonDecode(responseBody);
-
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('access', parsedResponse['access']);
-        await prefs.setString('refresh', parsedResponse['refresh']);
-
-        _showOtpDialog();
-      } else {
-        _showFailureDialog('Registration failed. Please try again.');
-      }
-    } else {
-      _showFailureDialog('Please complete the form and capture your face.');
+    // Attach images to the request
+    for (String imagePath in _capturedImagePaths) {
+      final file = File(imagePath);
+      request.files.add(await http.MultipartFile.fromPath(
+        'frontend/images',  // Ensure this matches the backend's expected field name
+        file.path,
+      ));
     }
+
+    final response = await request.send();
+
+    if (response.statusCode == 201) {
+      final responseBody = await response.stream.bytesToString();
+      final parsedResponse = jsonDecode(responseBody);
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('access', parsedResponse['access']);
+      await prefs.setString('refresh', parsedResponse['refresh']);
+
+      _showOtpDialog();
+    } else {
+      _showFailureDialog('Registration failed. Please try again.');
+    }
+  } else {
+    _showFailureDialog('Please complete the form and capture your face.');
   }
+}
 
   void _showOtpDialog() {
     showDialog(
@@ -264,7 +266,7 @@ class _StudentRegisterScreenState extends State<StudentRegisterScreen> {
                           ),
                         ),
                       ),
-                      SizedBox(height: isMobile ? 24.0 : 28.0),
+                      SizedBox(height: screenHeight * 0.03),
                       ElevatedButton(
                         onPressed: _register,
                         child: Text(
@@ -305,9 +307,7 @@ class _StudentRegisterScreenState extends State<StudentRegisterScreen> {
       obscureText: obscureText,
       decoration: InputDecoration(
         labelText: labelText,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.0),
-        ),
+        border: OutlineInputBorder(),
       ),
       validator: validator,
     );
