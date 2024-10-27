@@ -23,7 +23,7 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
       String password = _passwordController.text;
 
       var response = await http.post(
-        Uri.parse('http://192.168.1.8:8000/api/auth/teacher/login/'),
+        Uri.parse('http://192.168.1.7:8000/api/auth/teacher/login/'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'email_or_teacher_id': emailOrTeacherId,

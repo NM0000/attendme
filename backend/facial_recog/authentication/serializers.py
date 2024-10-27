@@ -58,8 +58,11 @@ class StudentRegistrationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data.pop('password2', None)
-        return User.objects.create_user(**validated_data, is_staff=False)
-
+        student_image = validated_data.pop('student_image')
+        user = User.objects.create_user(**validated_data, is_staff=False)
+        user.student_image = student_image  # Save image to the user
+        user.save()
+        return user
 # Teacher Login Serializer
 class TeacherLoginSerializer(serializers.Serializer):
     email_or_teacher_id = serializers.CharField()
@@ -207,3 +210,9 @@ class UserPasswordResetSerializer(serializers.Serializer):
             return attrs
         except DjangoUnicodeDecodeError:
             raise serializers.ValidationError('Token is not valid or expired')
+
+#facerecog
+from rest_framework import serializers
+
+class FaceRecognitionSerializer(serializers.Serializer):
+    image = serializers.ImageField()

@@ -3,11 +3,12 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'reminder_screen.dart';
-import 'take_attendance_screen.dart';
+import 'attendance_page.dart';
 import 'student_list_screen.dart';
 import 'teacher_reports_screen.dart';
 import 'settings_screen.dart';
-import 'teacher_profile_screen.dart'; // Import the teacher profile screen
+import 'teacher_profile_screen.dart'; 
+import 'package:camera/camera.dart';
 
 class TeacherHomeScreen extends StatefulWidget {
   const TeacherHomeScreen({super.key});
@@ -55,6 +56,17 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
     setState(() {
       _reminders = loadedReminders;
     });
+  }
+
+  // Call this method to get the cameras list.
+  Future<void> navigateToAttendancePage(BuildContext context) async {
+    final cameras = await availableCameras();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AttendancePage(cameras: cameras),
+      ),
+    );
   }
 
   @override
@@ -139,8 +151,9 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                       context,
                       'Take Attendance',
                       'assets/takeattendance.png',
-                      TakeAttendancePage(),
+                      null,
                       screenWidth),
+                      
                   _buildQuickAccessItem(
                       context,
                       'Student List',
@@ -193,13 +206,17 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
     );
   }
 
-  Widget _buildQuickAccessItem(BuildContext context, String title, String assetPath, Widget page, double screenWidth) {
+  Widget _buildQuickAccessItem(BuildContext context, String title, String assetPath, Widget? page, double screenWidth) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => page),
-        );
+        if (title == 'Take Attendance') {
+          navigateToAttendancePage(context); // Use this for the attendance page
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => page!),
+          );
+        }
       },
       child: Padding(
         padding: EdgeInsets.symmetric(vertical: screenWidth * 0.02),

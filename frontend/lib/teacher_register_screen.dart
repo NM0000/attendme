@@ -18,13 +18,14 @@ class _TeacherRegisterScreenState extends State<TeacherRegisterScreen> {
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   Future<void> _register() async {
     if (_formKey.currentState!.validate()) {
       try {
         final response = await http.post(
-          Uri.parse('http://192.168.1.8:8000/api/auth/teacher/register/'),
+          Uri.parse('http://192.168.1.7:8000/api/auth/teacher/register/'),
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
           },
@@ -57,7 +58,8 @@ class _TeacherRegisterScreenState extends State<TeacherRegisterScreen> {
             _showFailureDialog('Failed to retrieve tokens from the response.');
           }
         } else {
-          _showFailureDialog('Registration failed. Status Code: ${response.statusCode}');
+          _showFailureDialog(
+              'Registration failed. Status Code: ${response.statusCode}');
         }
       } catch (e) {
         _showFailureDialog('An error occurred: $e');
@@ -77,7 +79,8 @@ class _TeacherRegisterScreenState extends State<TeacherRegisterScreen> {
               Navigator.pop(context);
               Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(builder: (context) => const ChooseOptionScreen()),
+                MaterialPageRoute(
+                    builder: (context) => const ChooseOptionScreen()),
                 (route) => false,
               );
             },
@@ -206,7 +209,8 @@ class _TeacherRegisterScreenState extends State<TeacherRegisterScreen> {
                           padding: EdgeInsets.symmetric(
                               vertical: screenHeight * 0.015),
                           backgroundColor: Colors.white,
-                          minimumSize: Size(screenWidth * 0.7, screenHeight * 0.05),
+                          minimumSize:
+                              Size(screenWidth * 0.7, screenHeight * 0.05),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12.0),
                           ),
@@ -248,12 +252,13 @@ class _TeacherRegisterScreenState extends State<TeacherRegisterScreen> {
       ),
       obscureText: obscureText,
       keyboardType: keyboardType,
-      validator: validator ?? (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter your $labelText';
-        }
-        return null;
-      },
+      validator: validator ??
+          (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter your $labelText';
+            }
+            return null;
+          },
     );
   }
 }

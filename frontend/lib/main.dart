@@ -1,51 +1,61 @@
+// main.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:logging/logging.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:camera/camera.dart';
+import 'attendance_provider.dart';
+import 'attendance_page.dart';
 import 'landing_screen.dart';
 import 'choose_option_screen.dart';
 import 'student_login.dart';
 import 'teacher_login.dart';
 import 'student_register_screen.dart';
 import 'teacher_register_screen.dart';
-import 'attendance_provider.dart';
 import 'settings_screen.dart';
-import 'recent_courses_screen.dart'; 
+import 'recent_courses_screen.dart';
 import 'reminder_screen.dart';
-import 'student_home_screen.dart'; 
-import 'leave_note_screen.dart'; 
-import 'events_screen.dart'; 
-import 'student_attendance_report_screen.dart'; 
-import 'student_profile_screen.dart'; 
+import 'student_home_screen.dart';
+import 'leave_note_screen.dart';
+import 'events_screen.dart';
+import 'student_attendance_report_screen.dart';
+import 'student_profile_screen.dart';
 import 'help_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   _setupLogging();
-  runApp(const MyApp());
+
+  // Initialize the camera list
+  final cameras = await availableCameras();
+
+  runApp(MyApp(cameras: cameras));
 }
 
 void _setupLogging() {
-  Logger.root.level = Level.ALL; // defaults to Level.INFO
+  Logger.root.level = Level.ALL; // Set to Level.ALL for detailed logs
   Logger.root.onRecord.listen((record) {
     print('${record.level.name}: ${record.time}: ${record.message}');
   });
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final List<CameraDescription> cameras;
+
+  const MyApp({Key? key, required this.cameras}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AttendanceProvider()), 
+        ChangeNotifierProvider(create: (_) => AttendanceProvider()),
         // Add other providers if needed
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'AttendMe',
         theme: ThemeData(
-          primarySwatch: Colors.brown, // Adjusted to match your theme
+          primarySwatch: Colors.brown, // Adjusted to your theme color
         ),
         builder: (context, child) => ResponsiveBreakpoints.builder(
           child: child!,
@@ -67,12 +77,15 @@ class MyApp extends StatelessWidget {
           '/settings_screen': (context) => const SettingsScreen(),
           '/recent_courses_screen': (context) => const RecentCoursesScreen(),
           '/reminder_screen': (context) => const AddReminderScreen(),
-          '/student_home_screen': (context) => const StudentHomeScreen(), // Add the StudentHomeScreen route
-          '/leave_note_screen': (context) => const LeaveNoteScreen(), // Add the LeaveNoteScreen route
-          '/events_screen': (context) => const EventsScreen(), // Add the EventsScreen route
-          '/student_attendance_report_screen': (context) => const StudentAttendanceReportScreen(), // Add the StudentAttendanceReportScreen route
-          '/student_profile_screen': (context) => const StudentProfileScreen(), // Add the StudentProfileScreen route
-          '/help_screen': (context) => const HelpScreen(), // Add the HelpScreen route
+          '/student_home_screen': (context) => const StudentHomeScreen(),
+          '/leave_note_screen': (context) => const LeaveNoteScreen(),
+          '/events_screen': (context) => const EventsScreen(),
+          '/student_attendance_report_screen': (context) =>
+              const StudentAttendanceReportScreen(),
+          '/student_profile_screen': (context) => const StudentProfileScreen(),
+          '/help_screen': (context) => const HelpScreen(),
+          '/attendance': (context) =>
+              AttendancePage(cameras: cameras), // Attendance page route
         },
       ),
     );

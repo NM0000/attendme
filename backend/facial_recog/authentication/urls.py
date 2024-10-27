@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.conf.urls.static import static
 from django.urls import path
 from .views import (
     StudentRegistrationView,
@@ -11,7 +13,8 @@ from .views import (
     UserChangePasswordView,
     SendPasswordResetEmailView,
     UserPasswordResetView,
-    UploadImageAPIView,
+    UploadImagesAPIView,
+    RealTimeFaceRecognitionView,
 )
 
 urlpatterns = [
@@ -20,7 +23,8 @@ urlpatterns = [
     path('student/register/', StudentRegistrationView.as_view(), name='student-register'),
     path('student/login/', StudentLoginView.as_view(), name='student-login'),
     path('student/profile/', StudentProfileView.as_view(), name='student-profile'),
-    path('upload-image/', UploadImageAPIView.as_view(), name='upload_image'),
+    path('upload_images/', UploadImagesAPIView.as_view(), name='upload_image'),
+    path('recognize-face/', RealTimeFaceRecognitionView.as_view(), name='recognize_face'),
 
     # Teacher URLs
     path('teacher/', TeacherListAPI.as_view(), name='teacher_list_api'),
@@ -33,7 +37,9 @@ urlpatterns = [
     path('changepassword/', UserChangePasswordView.as_view(), name='change-password'),
     path('send-reset-password-email/', SendPasswordResetEmailView.as_view(), name='send-reset-password-email'),
     path('reset-password/<uid>/<token>/', UserPasswordResetView.as_view(), name='reset-password'),
-]
 
+]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
     
