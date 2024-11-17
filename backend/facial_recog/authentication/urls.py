@@ -15,6 +15,9 @@ from .views import (
     UserPasswordResetView,
     UploadImagesAPIView,
     RealTimeFaceRecognitionView,
+    AttendanceListCreateView, 
+    AttendanceRetrieveUpdateView,
+    AttendanceDetailView,
 )
 
 urlpatterns = [
@@ -37,6 +40,14 @@ urlpatterns = [
     path('changepassword/', UserChangePasswordView.as_view(), name='change-password'),
     path('send-reset-password-email/', SendPasswordResetEmailView.as_view(), name='send-reset-password-email'),
     path('reset-password/<uid>/<token>/', UserPasswordResetView.as_view(), name='reset-password'),
+
+    #Attendance URLs
+    # List all attendance records or create new ones
+    path('attendance/', AttendanceListCreateView.as_view(), name='attendance_list_create'),
+    # Retrieve or update attendance by student ID
+    path('attendance/<str:student_id>/', AttendanceRetrieveUpdateView.as_view(), name='attendance_retrieve_update'),
+    # Read-only fetch of attendance for a specific student
+    path('attendance/detail/<str:student_id>/', AttendanceDetailView.as_view(), name='attendance_detail'),
 
 ]
 if settings.DEBUG:

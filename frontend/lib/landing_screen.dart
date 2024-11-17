@@ -9,7 +9,8 @@ class LandingScreen extends StatefulWidget {
   _LandingScreenState createState() => _LandingScreenState();
 }
 
-class _LandingScreenState extends State<LandingScreen> with SingleTickerProviderStateMixin {
+class _LandingScreenState extends State<LandingScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
@@ -103,7 +104,8 @@ class _LandingScreenState extends State<LandingScreen> with SingleTickerProvider
                     semanticLabel: 'AttendMe Logo',
                   ),
                 ),
-                SizedBox(height: ResponsiveValue<double>(
+                SizedBox(
+                    height: ResponsiveValue<double>(
                   context,
                   defaultValue: 20.0,
                   conditionalValues: [
@@ -126,7 +128,8 @@ class _LandingScreenState extends State<LandingScreen> with SingleTickerProvider
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: ResponsiveValue<double>(
+                SizedBox(
+                    height: ResponsiveValue<double>(
                   context,
                   defaultValue: 20.0,
                   conditionalValues: [
@@ -135,7 +138,7 @@ class _LandingScreenState extends State<LandingScreen> with SingleTickerProvider
                   ],
                 ).value),
                 Text(
-                  'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+                  'Your Face, Your Presence, Seamlessly Counted.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: ResponsiveValue<double>(
@@ -149,7 +152,8 @@ class _LandingScreenState extends State<LandingScreen> with SingleTickerProvider
                     color: Color(0xFF212121), // Updated text color
                   ),
                 ),
-                SizedBox(height: ResponsiveValue<double>(
+                SizedBox(
+                    height: ResponsiveValue<double>(
                   context,
                   defaultValue: 50.0,
                   conditionalValues: [
@@ -188,7 +192,8 @@ class _LandingScreenState extends State<LandingScreen> with SingleTickerProvider
                     },
                   ),
                 ),
-                SizedBox(height: ResponsiveValue<double>(
+                SizedBox(
+                    height: ResponsiveValue<double>(
                   context,
                   defaultValue: 20.0,
                   conditionalValues: [

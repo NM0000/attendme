@@ -45,7 +45,7 @@ Future<void> _register() async {
   if (_formKey.currentState!.validate() && _capturedImagePaths.isNotEmpty) {
     final request = http.MultipartRequest(
       'POST',
-      Uri.parse('http://192.168.1.7:8000/api/auth/student/register/'),  // Your registration endpoint URI
+      Uri.parse('http://192.168.1.5:8000/api/auth/student/register/'),  // Your registration endpoint URI
     );
 
     request.fields['studentId'] = _studentIdController.text;

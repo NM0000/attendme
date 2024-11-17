@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import User 
+from .models import User, Attendance 
 from .serializers import (
     TeacherRegistrationSerializer,
     StudentRegistrationSerializer,
@@ -21,7 +21,7 @@ from .serializers import (
     SendPasswordResetEmailSerializer,
     UserPasswordResetSerializer,
     UserChangePasswordSerializer,
-    FaceRecognitionSerializer,
+    AttendanceSerializer,
 )
 from .renderers import UserRenderer
 from django.contrib.auth import authenticate
@@ -72,6 +72,7 @@ class StudentRegistrationView(APIView):
             }, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 # Teacher Login View
 class TeacherLoginView(APIView):
@@ -150,35 +151,43 @@ class UserPasswordResetView(APIView):
 
 #Upload Image View
 class UploadImagesAPIView(APIView):
-    def post(self, request, *args, **kwargs):
-        student_id = request.data.get('student_id')
-        images = request.FILES.getlist('images')  # Assuming you're sending images as a list
+    permission_classes = [IsAuthenticated]  # Only authenticated users can upload images
 
-        # Check for required parameters
-        if not student_id or not images:
-            return Response({'error': 'student_id and images are required'}, status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request):
+        user = request.user  # Get the currently authenticated user
 
-        # Create a folder for the student if it doesn't exist
-        student_folder = os.path.join('media/images/', student_id)
-        if not os.path.exists(student_folder):
-            os.makedirs(student_folder)
+        # Expecting exactly 12 images
+        images = request.FILES.getlist('images')
+        if len(images) != 12:
+            return Response({'error': 'Please upload exactly 12 images.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Save images with unique names
-        for count, img in enumerate(images):
-            img_name = f'{student_id}_image_{count + 1}.jpg'  # Changed index to start from 1
-            img_path = os.path.join(student_folder, img_name)
+        # Define the paths where the images will be saved
+        train_dir = os.path.join(settings.MEDIA_ROOT, 'Dataset', 'train')
+        test_dir = os.path.join(settings.MEDIA_ROOT, 'Dataset', 'test')
 
-            # Save the image
-            with default_storage.open(img_path, 'wb+') as destination:
-                for chunk in img.chunks():
+        # Ensure directories exist
+        os.makedirs(train_dir, exist_ok=True)
+        os.makedirs(test_dir, exist_ok=True)
+
+        # Save the first 9 images to the train directory and the last 3 to the test directory
+        for i, image in enumerate(images):
+            if i < 9:
+                # Save in the training directory
+                save_path = os.path.join(train_dir, f'{user.id}_{i+1}.jpg')
+            else:
+                # Save in the test directory
+                save_path = os.path.join(test_dir, f'{user.id}_{i+1}.jpg')
+
+            # Use Django's default storage system to save the images
+            with default_storage.open(save_path, 'wb+') as destination:
+                for chunk in image.chunks():
                     destination.write(chunk)
 
-        return Response({'message': 'Images saved successfully'}, status=status.HTTP_200_OK)
+        return Response({'message': 'Images uploaded successfully.'}, status=status.HTTP_201_CREATED)
 
 
   
-#facerecog
-# face_recognition/views.py
+#face_recognition
 import cv2 as cv
 import numpy as np
 from rest_framework.views import APIView
@@ -238,3 +247,77 @@ class RealTimeFaceRecognitionView(APIView):
         frame_base64 = base64.b64encode(buffer).decode('utf-8')
 
         return Response({"recognized_name": recognized_name, "processed_frame": frame_base64})
+
+#Attandance_report_views.py
+class AttendanceListCreateView(APIView):
+    
+    def get(self, request):
+        # Fetch all attendance records
+        attendance_records = Attendance.objects.all()
+        serializer = AttendanceSerializer(attendance_records, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        # Get the recognized students from request data
+        recognized_students = request.data.get('recognized_students', [])
+        
+        if not recognized_students:
+            return Response({"error": "No recognized students provided."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Update attendance for recognized students
+        for student in User.objects.filter(student_id__in=recognized_students):
+            attendance, created = Attendance.objects.get_or_create(student=student)
+            attendance.total_classes += 1
+            attendance.present_count += 1
+            attendance.save()
+
+        # Update attendance for absent students (those not recognized)
+        all_students = User.objects.filter(student_id__isnull=False)
+        for student in all_students:
+            if student.student_id not in recognized_students:
+                attendance, created = Attendance.objects.get_or_create(student=student)
+                attendance.total_classes += 1
+                attendance.absent_count += 1
+                attendance.save()
+
+        return Response({"message": "Attendance updated successfully"}, status=status.HTTP_200_OK)
+
+class AttendanceRetrieveUpdateView(APIView):
+
+    def get(self, request, student_id):
+        try:
+            attendance = Attendance.objects.get(student__student_id=student_id)
+            serializer = AttendanceSerializer(attendance)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Attendance.DoesNotExist:
+            return Response({"error": "Attendance record not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    def put(self, request, student_id):
+        try:
+            attendance = Attendance.objects.get(student__student_id=student_id)
+        except Attendance.DoesNotExist:
+            return Response({"error": "Attendance record not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        recognized_students = request.data.get('recognized_students', [])
+        
+        if student_id in recognized_students:
+            attendance.present_count += 1  # Mark as present
+        else:
+            attendance.absent_count += 1  # Mark as absent
+
+        attendance.total_classes += 1
+        attendance.save()
+
+        serializer = AttendanceSerializer(attendance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class AttendanceDetailView(APIView):
+
+    def get(self, request, student_id):
+        try:
+            attendance = Attendance.objects.get(student__student_id=student_id)
+            serializer = AttendanceSerializer(attendance)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Attendance.DoesNotExist:
+            return Response({"error": "Attendance record not found"}, status=status.HTTP_404_NOT_FOUND)
+

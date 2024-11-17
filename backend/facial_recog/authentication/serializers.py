@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from .models import User
+from .models import User, Attendance
+
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.utils.encoding import force_bytes, smart_str, DjangoUnicodeDecodeError
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
@@ -211,8 +212,11 @@ class UserPasswordResetSerializer(serializers.Serializer):
         except DjangoUnicodeDecodeError:
             raise serializers.ValidationError('Token is not valid or expired')
 
-#facerecog
-from rest_framework import serializers
+#attendance serializers
+class AttendanceSerializer(serializers.ModelSerializer):
+    student_name = serializers.CharField(source='student.get_full_name', read_only=True)
+    student_id = serializers.CharField(source='student.student_id', read_only=True)
 
-class FaceRecognitionSerializer(serializers.Serializer):
-    image = serializers.ImageField()
+    class Meta:
+        model = Attendance
+        fields = ['id', 'student_name', 'student_id', 'total_classes', 'present_count', 'absent_count']

@@ -36,7 +36,7 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
 
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.1.7:8000/api/auth/teacher/profile/'),
+        Uri.parse('http://192.168.1.5:8000/api/auth/teacher/profile/'),
         headers: {
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',

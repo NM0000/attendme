@@ -35,7 +35,7 @@ INSTALLED_APPS = [
 
 # Media file configurations
 MEDIA_URL = '/media/'
-MEDIA_ROOT = r'D:\IIMS COLLEGE\Bcs 8th sem\attendme\backend\media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

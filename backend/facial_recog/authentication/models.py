@@ -38,6 +38,7 @@ class User(AbstractBaseUser):
     student_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
     batch = models.CharField(max_length=50, null=True, blank=True)
     enrolled_year = models.IntegerField(null=True, blank=True)
+    student_image = models.ImageField(upload_to='images/', null=True, blank=True)
 
     objects = UserManager()
 
@@ -53,3 +54,12 @@ class User(AbstractBaseUser):
     def has_module_perms(self, app_label):
         return True
 
+#create attendance model
+class Attendance(models.Model):
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    total_classes = models.IntegerField(default=0)
+    present_count = models.IntegerField(default=0)
+    absent_count = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.student.first_name} {self.student.last_name}'s Attendance"
